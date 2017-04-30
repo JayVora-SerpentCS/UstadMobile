@@ -1,0 +1,21 @@
+apply plugin: 'java'
+
+task runOrmLiteGeneration(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    main = "com.ustadmobile.nanolrs.entitygen.EntityGeneratorOrmLite"
+    args "../sharedse/src/main/java/com/ustadmobile/port/sharedse/proxy/", "../ustadmobile-ormlite/src/main/java/com/ustadmobile/ustadmobile/ormlite/generated/model", "com.ustadmobile.ustadmobile.ormlite.generated.model"
+}
+
+//To get ustadmobile's nanolrs-entitygen
+repositories {
+    mavenCentral()
+    maven {
+        url "http://devserver2.ustadmobile.com/repo-mvn"
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile "com.ustadmobile.nanolrs:nanolrs-entitygen:0.1.47"
+
+}

@@ -18,7 +18,9 @@ if(project.file("buildconfig.local.properties").exists()) {
 //Write the combined build properties to a file for use by ant
 
 task generateJ2meBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
-    inputs.files(project.files("buildconfig.*.properties"))
+    //inputs.files(project.files("buildconfig.*.properties"))
+    inputs.files(project.files("buildconfig.local.properties"))
+    inputs.files(project.files("buildconfig.default.properties"))
 
     outputDir = new File ("${projectDir}/src")
     packageName = "com.ustadmobile.port.j2me.buildconfig"

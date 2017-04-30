@@ -1,0 +1,16 @@
+apply plugin: 'java'
+
+compileJava.dependsOn(":ustadmobile-entitygen:runOrmLiteGeneration") //in ustadmobile-ormlite
+
+repositories {
+    mavenCentral()
+    maven {
+        url "http://devserver2.ustadmobile.com/repo-mvn"
+    }
+}
+
+dependencies {
+    compile "com.j256.ormlite:ormlite-core:5.0"
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(':sharedse')
+}

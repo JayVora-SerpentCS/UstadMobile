@@ -1,0 +1,36 @@
+//apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'war'
+apply plugin: 'gwt'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
+    }
+}
+
+gwt {
+    gwtVersion='2.7.0'
+    modules 'com.ustadmobile.TestProject'
+
+}
+
+
+//To get ustadmobile's nanolrs-jdbc and nanolrs-servlet library
+repositories {
+    mavenCentral()
+    maven {
+        url "http://devserver2.ustadmobile.com/repo-mvn"
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.ustadmobile.nanolrs:nanolrs-core:0.1.47'
+    compile 'com.ustadmobile.nanolrs:nanolrs-jdbc:0.1.47'
+    compile 'com.ustadmobile.nanolrs:nanolrs-servlet:0.1.47'
+}
+

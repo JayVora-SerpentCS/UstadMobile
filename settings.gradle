@@ -1,2 +1,2 @@
-include ':app-android', ':core', ':sharedse', ':core-tests'
+include ':app-android', ':core', ':sharedse', ':core-tests', ':app-gwt', ':ustadmobile-entitygen', ':ustadmobile-ormlite'
 include ':app-j2me'

@@ -9,13 +9,28 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app-android" />
+            <option value="$PROJECT_DIR$/app-gwt" />
             <option value="$PROJECT_DIR$/app-j2me" />
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/core-tests" />
             <option value="$PROJECT_DIR$/sharedse" />
+            <option value="$PROJECT_DIR$/ustadmobile-entitygen" />
+            <option value="$PROJECT_DIR$/ustadmobile-ormlite" />
           </set>
         </option>
-        <option name="resolveModulePerSourceSet" value="false" />
+        <option name="myModules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app-android" />
+            <option value="$PROJECT_DIR$/app-gwt" />
+            <option value="$PROJECT_DIR$/app-j2me" />
+            <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/core-tests" />
+            <option value="$PROJECT_DIR$/sharedse" />
+            <option value="$PROJECT_DIR$/ustadmobile-entitygen" />
+            <option value="$PROJECT_DIR$/ustadmobile-ormlite" />
+          </set>
+        </option>
       </GradleProjectSettings>
     </option>
   </component>

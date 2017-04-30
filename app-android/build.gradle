@@ -92,7 +92,9 @@ android {
 }
 
 task checkBuildConfig {
-    inputs.files("buildconfig.*.properties")
+    //inputs.files("buildconfig.*.properties")
+    inputs.files("buildconfig.default.properties")
+    inputs.files("buildconfig.local.properties")
 }
 assemble.dependsOn(checkBuildConfig)
 
