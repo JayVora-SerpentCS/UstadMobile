@@ -1,7 +1,7 @@
 package com.ustadmobile.ustadmobile.ormlite.generated.model;
 
 import com.j256.ormlite.table.DatabaseTable;
-import com.ustadmobile.port.sharedse.proxy.MgmtTest;
+import com.ustadmobile.port.sharedse.persistence.proxy.MgmtTest;
 import com.j256.ormlite.field.DatabaseField;
 
 @DatabaseTable(tableName = "mgmt_test")

@@ -36,7 +36,7 @@ dependencies {
     compile "org.json:json:20160212";
     compile "net.sf.kxml:kxml2:2.3.0";
     compile 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0-SNAPSHOT'
-    compile 'com.ustadmobile.nanolrs:nanolrs-core:0.1.47'
+    //compile 'com.ustadmobile:nanolrs-core:0.1.48'
     testCompile project(":core-tests")
     testCompile group: 'junit', name: 'junit', version: '4.+'
 }
