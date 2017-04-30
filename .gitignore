@@ -232,3 +232,6 @@ app-android/src/main/assets/locale
 
 #MacOS annoying .DS_Store
 .DS_Store
+
+#gwt 
+*jar

@@ -1,1 +1,4 @@
 /build
+/gwt-unitCache
+/src/main/webapp/WEB-INF/lib/
+/war/WEB-INF/lib/
