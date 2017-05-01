@@ -32,7 +32,7 @@ public class UstadMobilePersistenceManagerOrmLite extends UstadMobilePersistence
         NanoLrsManager<? extends NanoLrsModel, ?> manager = managersCache.get(managerType);
         if(manager == null) {
             try {
-                manager = MANAGER_IMPL_MAP.get(managerType).newInstance();
+                //manager = MANAGER_IMPL_MAP.get(managerType).newInstance();
             }catch(Exception e) {
 
             }

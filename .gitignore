@@ -234,4 +234,4 @@ app-android/src/main/assets/locale
 .DS_Store
 
 #gwt 
-*jar
+#*jar #Commented. Since we don't want to get rid of the gradle wrapper jar file
