@@ -29,8 +29,8 @@ repositories {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.ustadmobile.nanolrs:nanolrs-core:0.1.47'
-    compile 'com.ustadmobile.nanolrs:nanolrs-jdbc:0.1.47'
-    compile 'com.ustadmobile.nanolrs:nanolrs-servlet:0.1.47'
+    compile 'com.ustadmobile.nanolrs:nanolrs-core:0.1.48'
+    compile 'com.ustadmobile.nanolrs:nanolrs-jdbc:0.1.48'
+    compile 'com.ustadmobile.nanolrs:nanolrs-servlet:0.1.48'
 }
 

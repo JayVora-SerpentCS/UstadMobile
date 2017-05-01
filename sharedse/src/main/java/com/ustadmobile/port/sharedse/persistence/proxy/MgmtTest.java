@@ -1,4 +1,4 @@
-package com.ustadmobile.port.sharedse.proxy;
+package com.ustadmobile.port.sharedse.persistence.proxy;
 
 /**
  * Created by Varuna on 4/27/2017.
