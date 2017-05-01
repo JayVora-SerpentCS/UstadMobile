@@ -13,4 +13,7 @@ dependencies {
     compile "com.j256.ormlite:ormlite-core:5.0"
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':sharedse')
+    compile "com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"
+    compile "com.ustadmobile.nanolrs:nanolrs-ormlite:$nanoLrsVersion"
+    compile "com.j256.ormlite:ormlite-core:5.0"
 }

@@ -3,7 +3,7 @@ apply plugin: 'java'
 task runOrmLiteGeneration(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     main = "com.ustadmobile.nanolrs.entitygen.EntityGeneratorOrmLite"
-    args "../sharedse/src/main/java/com/ustadmobile/port/sharedse/proxy/", "../ustadmobile-ormlite/src/main/java/com/ustadmobile/ustadmobile/ormlite/generated/model", "com.ustadmobile.ustadmobile.ormlite.generated.model"
+    args "../sharedse/src/main/java/com/ustadmobile/port/sharedse/persistence/proxy/", "../ustadmobile-ormlite/src/main/java/com/ustadmobile/port/ormlite/persistence/generated/model", "com.ustadmobile.port.ormlite.persistence.generated.model"
 }
 
 //To get ustadmobile's nanolrs-entitygen
