@@ -3,6 +3,7 @@ package com.ustadmobile.port.sharedse.persistence.manager;
 import com.ustadmobile.nanolrs.core.manager.NanoLrsManager;
 import com.ustadmobile.port.sharedse.persistence.proxy.Person;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -13,6 +14,6 @@ import java.util.List;
  */
 public interface PersonManager extends NanoLrsManager {
     //Person specific methods  to work with.
-    List<Person> findAllByFirstName (Object dbContext, String firstName);
+    List<Person> findAllByFirstName (Object dbContext, String firstName) throws SQLException;
 
 }

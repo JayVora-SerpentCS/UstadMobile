@@ -1,8 +1,8 @@
-//apply plugin: 'java'
+apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'war'
 apply plugin: 'gwt'
-
+ 
 buildscript {
     repositories {
         jcenter()
@@ -29,8 +29,12 @@ repositories {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.ustadmobile.nanolrs:nanolrs-core:0.1.48'
-    compile 'com.ustadmobile.nanolrs:nanolrs-jdbc:0.1.48'
-    compile 'com.ustadmobile.nanolrs:nanolrs-servlet:0.1.48'
+    compile project(':core')
+    compile "com.ustadmobile.nanolrs:nanolrs-ormlite:$nanoLrsVersion"
+    compile "com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"
+    compile "com.ustadmobile.nanolrs:nanolrs-jdbc:$nanoLrsVersion"
+    compile "com.ustadmobile.nanolrs:nanolrs-servlet:$nanoLrsVersion"
+    testCompile project(":sharedse-tests")
+    compile project(path: ':ustadmobile-ormlite')
 }
 

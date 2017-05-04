@@ -705,4 +705,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }
         return versionInfo;
     }
+
+    @Override
+    public void registerManagers() {
+        //TODO: This for later
+        l(UMLog.WARN, 0,"registerManagers() not implemented internally.");
+    }
 }

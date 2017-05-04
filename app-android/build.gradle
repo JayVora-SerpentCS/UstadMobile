@@ -133,6 +133,8 @@ dependencies {
     compile 'com.github.clans:fab:1.6.4'
     androidTestCompile project(":core-tests")
     androidTestCompile 'junit:junit:4.12'
+    testCompile 'junit:junit:4.12' //testing
+    testCompile project(":sharedse-tests") //testing
     /*
         compile fileTree(dir: 'libs', include: ['*.jar'])
         androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {

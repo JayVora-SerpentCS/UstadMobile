@@ -3,6 +3,9 @@
 buildscript {
     repositories {
         jcenter()
+        maven {
+            url "http://devserver2.ustadmobile.com/repo-mvn"
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.1'

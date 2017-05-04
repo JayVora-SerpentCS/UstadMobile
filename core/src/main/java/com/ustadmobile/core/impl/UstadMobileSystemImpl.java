@@ -1118,8 +1118,8 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract String hashAuth(Object context, String auth);
 
-
-
+    /* Register manager and implementation */
+    public abstract void registerManagers();
     
 }
 

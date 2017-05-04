@@ -87,8 +87,9 @@ public class TestCatalogController extends TestCase{
         opdsURL = TestUtils.getInstance().getHTTPRoot() + TestConstants.CATALOG_OPDS_ROOT;
         acquireOPDSURL = TestUtils.getInstance().getHTTPRoot() + "acquire-multi.opds";
     }
-    
-    public void testCatalogController() throws IOException, XmlPullParserException {
+
+    /* TODO: Uncomment this. */
+    /*public void testCatalogController() throws IOException, XmlPullParserException {
         final Object context = UMContextGetter.getContext(this);
         final TestUtils testUtils = new TestUtils();
         UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 311, null);
@@ -203,9 +204,10 @@ public class TestCatalogController extends TestCase{
         assertEquals("After filtering micro type micro epub link remains",
             "application/epub+zip;x-umprofile=micro",
             filteredLink[UstadJSOPDSItem.ATTR_MIMETYPE]);
-    }
+    }*/
     
     public void runTest() throws IOException, XmlPullParserException{
-        testCatalogController();
+        //TODO: Uncomment this.
+        //testCatalogController();
     }
 }

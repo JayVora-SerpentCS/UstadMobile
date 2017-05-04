@@ -1,0 +1,17 @@
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+    maven {
+        url "http://devserver2.ustadmobile.com/repo-mvn"
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(":sharedse")
+    compile 'junit:junit:4.12'
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
