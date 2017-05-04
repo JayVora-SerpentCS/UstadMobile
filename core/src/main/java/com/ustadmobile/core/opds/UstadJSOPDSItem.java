@@ -32,12 +32,16 @@ package com.ustadmobile.core.opds;
 
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
 
+import org.kxml2.io.KXmlSerializer;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -58,6 +62,8 @@ public abstract class UstadJSOPDSItem {
     
     protected Vector linkVector;
 
+    protected String language;
+
     public static final String NS_ATOM = "http://www.w3.org/2005/Atom";
 
     public static final String NS_DC = "http://purl.org/dc/terms/";
@@ -76,6 +82,8 @@ public abstract class UstadJSOPDSItem {
     public static final int ATTR_UPDATED = 9;
     public static final int ATTR_LINK = 10;
     public static final int ATTR_ENTRY = 11;
+    public static final int ATTR_CONTENT = 12;
+    public static final int ATTR_TYPE = 13;
     
     public static final String[] ATTR_NAMES = {
         "rel", //ATTR_REL 
@@ -83,15 +91,32 @@ public abstract class UstadJSOPDSItem {
         "href", //ATTR_HREF
         "length", //ATTR_LENGTH
         "title",  //ATTR_TITLE
-        "hreflang", //AtTR_HREFLANG
+        "hreflang", //ATTR_HREFLANG
         "id", //ATTR_ID
         "summary",//ATTR_SUMMARY
         "publisher", //ATTR_PUBLISHER
         "updated", //ATTR_UPDATED
         "link", //ATTR_LINK
-        "entry"
+        "entry", //ATTR_ENTRY
+        "content", // ATTR_CONTENT
+        "type" //ATTR_TYPE
     };
-    
+
+    /**
+     * Entry content type - text
+     */
+    public static final String CONTENT_TYPE_TEXT = "text";
+
+    /**
+     * Entry content type - html
+     */
+    public static final String CONTENT_TYPE_XHTML = "xhtml";
+
+    /**
+     * The type attribute of the content tag.
+     */
+    protected String contentType;
+
     /**
      * ATTR_NAMES from 0 to LINK_ATTRS_END are those that are stored in the 
      * String array returned by UstadJSOPDSFeed to represent a link
@@ -108,6 +133,9 @@ public abstract class UstadJSOPDSItem {
     public String updated;
     
     public String summary;
+
+    public String content;
+
     public Vector authors;    
     public String publisher;
     
@@ -140,6 +168,17 @@ public abstract class UstadJSOPDSItem {
     */
     public static String LINK_ACQUIRE_OPENACCESS = 
            "http://opds-spec.org/acquisition/open-access";
+
+    public static final String LINK_REL_SELF = "self";
+
+    /**
+     * Sometimes we need to know where a feed came from in order to resolve a link contained in that
+     * feed. The self link itself might be relative. The feed might be serialized along the way.
+     * Therefor we need to embed an absolute link to the feed itself.
+     *
+     * We do this by adding a link with the rel attribute set
+     */
+    public static final String LINK_REL_SELF_ABSOLUTE = "http://www.ustadmobile.com/namespace/self-absolute";
 
     /**
     * Type to be used for a catalog link of an acquisition feed as per OPDS spec
@@ -176,15 +215,34 @@ public abstract class UstadJSOPDSItem {
     * @type String
     */
     public static String LINK_THUMBNAIL = "http://opds-spec.org/image/thumbnail";
-    
-    
+
 
     public UstadJSOPDSItem() {
         this.linkVector = new Vector();
     }
-    
-    public void addLink(String rel, String mimeType, String href) {
-        linkVector.addElement(new String[]{rel, mimeType, href, null, null, null});
+
+    /**
+     * The language of this item as specified by the dublin core dc:language tag if present
+     *
+     * @return Language specified by dc language tag, or null if not present
+     */
+    public String getLanguage() {
+        return language;
+    }
+
+    /**
+     * The language of this item as specified by the dublin core dc:language tag
+     *
+     * @param language The langauge for this item
+     */
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public String[] addLink(String rel, String mimeType, String href) {
+        String[] newLink = new String[]{rel, mimeType, href, null, null, null};
+        linkVector.addElement(newLink);
+        return newLink;
     }
     
     /**
@@ -334,6 +392,26 @@ public abstract class UstadJSOPDSItem {
         serializeStringToTag(xs, UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_TITLE], title);
         serializeStringToTag(xs, UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_ID], id);
         serializeStringToTag(xs, UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_SUMMARY], summary);
+
+
+        serializeStringToTag(xs, UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_CONTENT], content);
+        if(content != null) {
+            if(getContentType().equals(CONTENT_TYPE_TEXT)) {
+                xs.startTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_CONTENT])
+                        .attribute(null, ATTR_NAMES[ATTR_TYPE], getContentType());
+                xs.text(content);
+                xs.endTag(NS_ATOM, ATTR_NAMES[ATTR_CONTENT]);
+            }else {
+                try {
+                    XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
+                    parser.setInput(new ByteArrayInputStream(content.getBytes("UTF-8")), "UTF-8");
+                    UMUtil.passXmlThrough(parser, xs, null);//TODO: check depth at which tag ends
+                }catch(XmlPullParserException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         serializeStringToTag(xs, UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_UPDATED], updated);
         serializeStringToTag(xs, UstadJSOPDSFeed.NS_DC, ATTR_NAMES[ATTR_PUBLISHER], publisher);
         
@@ -360,13 +438,15 @@ public abstract class UstadJSOPDSItem {
      * @param ns
      * @param tagName
      * @param tagValue
-     * @throws IOException 
+     * @throws IOException
      */
     private void serializeStringToTag(XmlSerializer xs, String ns, String tagName, String tagValue) throws IOException {
         if(tagValue != null) {
             xs.startTag(ns, tagName).text(tagValue).endTag(ns, tagName);
         }
     }
+
+
 
     protected void serializeStartDoc(XmlSerializer xs) throws IOException {
         xs.startDocument("UTF-8", Boolean.FALSE);
@@ -412,7 +492,6 @@ public abstract class UstadJSOPDSItem {
         String name;
         String[] linkAttrs;
         int i;
-        String content = null;
         boolean isFeed = this instanceof UstadJSOPDSFeed;
         Vector entriesFound = isFeed? new Vector() : null;
 
@@ -437,12 +516,23 @@ public abstract class UstadJSOPDSItem {
                     this.updated = xpp.getText();
                 }else if(name.equals(ATTR_NAMES[ATTR_SUMMARY]) && xpp.next() == XmlPullParser.TEXT) {
                     this.summary = xpp.getText();
-                }else if(name.equals("content") && xpp.next() == XmlPullParser.TEXT) {
-                    content = xpp.getText();
+                }else if(name.equals("content")) {
+                    contentType = xpp.getAttributeValue(null, ATTR_NAMES[ATTR_TYPE]);
+                    if(contentType != null && contentType.equals(CONTENT_TYPE_XHTML)) {
+                        this.content = UMUtil.passXmlThroughToString(xpp, ATTR_NAMES[ATTR_CONTENT]);
+                        //int openContentTagStart = content.indexOf("<content");
+                        //int openContentTagEnd = content.indexOf('>', openContentTagStart+1);
+                        //int closeContentTagStart = content.lastIndexOf("</content");
+                        //this.content = this.content.substring(openContentTagEnd+1, closeContentTagStart);
+                    }else if(xpp.next() == XmlPullParser.TEXT){
+                        this.content = xpp.getText();
+                    }
                 }else if(name.equals("dc:publisher") && xpp.next() == XmlPullParser.TEXT){ // Fix this
                     this.publisher = xpp.getText();
                 }else if(name.equals("dcterms:publisher") && xpp.next() == XmlPullParser.TEXT){
                     this.publisher = xpp.getText();
+                }else if(name.equals("dc:language") && xpp.next() == XmlPullParser.TEXT) {
+                    this.language = xpp.getText();
                 }else if(name.equals("author")){
                     UstadJSOPDSAuthor currentAuthor = new UstadJSOPDSAuthor();
                     do {
@@ -512,6 +602,33 @@ public abstract class UstadJSOPDSItem {
         loadFromXpp(parser);
     }
 
+    /**
+     * Find a list of the languages a link is available in. If no language is specified on hreflang
+     * then we assume that link is in the language of the item it came from.
+     *
+     * @param links Vector of String[] arrays representing links
+     * @param languageList (can be null) The vector into which we will add new languages found.
+     *
+     * @return Vector containing all distinct languages found
+     */
+    public Vector getHrefLanguagesFromLinks(Vector links, Vector languageList) {
+        if(languageList == null)
+            languageList = new Vector();
+
+        int numLinks = links.size();
+        String lang;
+        for(int i = 0; i < numLinks; i++) {
+            lang = ((String[])links.elementAt(i))[ATTR_HREFLANG];
+            if(lang == null)
+                lang = getLanguage();
+
+            if(languageList.indexOf(lang) == -1)
+                languageList.addElement(lang);
+        }
+
+        return languageList;
+    }
+
 
     private int parseColorString(String colorStr) {
         if(bgColor == null) {
@@ -528,6 +645,10 @@ public abstract class UstadJSOPDSItem {
         return -2;
     }
 
+    public String getContentType() {
+        return contentType != null ? contentType: CONTENT_TYPE_TEXT;
+    }
+
     public int getBgColor() {
         return parseColorString(bgColor);
     }
@@ -535,5 +656,8 @@ public abstract class UstadJSOPDSItem {
     public int getTextColor() {
         return parseColorString(textColor);
     }
+
+
+
 
 }

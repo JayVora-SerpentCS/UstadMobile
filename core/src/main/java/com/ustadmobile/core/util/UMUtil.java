@@ -33,6 +33,8 @@ package com.ustadmobile.core.util;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -42,6 +44,9 @@ import java.util.Vector;
     import org.json.me.*;
  $else$ */
     import org.json.*;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 /* $endif$ */
 
 /**
@@ -341,8 +346,79 @@ public class UMUtil {
         public int compare(Object o1, Object o2);
         
     }
-    
-    
-    
+
+    /**
+     * Get the index of an item in an array. Filler method because this doesn't existing on J2ME.
+     *
+     * @param haystack Array to search in
+     * @param needle Value to search for
+     * @param from Index to start searching from (inclusive)
+     * @param to Index to search until (exclusive)
+     * @return Index of needle in haystack, -1 if not found
+     */
+    public static int indexInArray(Object[] haystack, Object needle, int from, int to) {
+        for(int i = from; i < to; i++) {
+            if(haystack[i] == null && needle == null) {
+                return i;
+            }else if(haystack[i] != null && haystack[i].equals(needle)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Get the index of an item in an array. Filler method because this doesn't existing on J2ME.
+     *
+     * @param haystack Array to search in
+     * @param needle Value to search for
+     */
+    public static int indexInArray(Object[] haystack, Object needle) {
+        return indexInArray(haystack, needle, 0, haystack.length);
+    }
+
+    public static void passXmlThrough(XmlPullParser xpp, XmlSerializer xs, String endTagName) throws XmlPullParserException, IOException {
+        int evtType = xpp.getEventType();
+        String tagName;
+        while(evtType != XmlPullParser.END_DOCUMENT) {
+            switch(evtType) {
+                case XmlPullParser.START_TAG:
+                    xs.startTag(xpp.getNamespace(), xpp.getName());
+                    for(int i = 0; i < xpp.getAttributeCount(); i++) {
+                        xs.attribute(xpp.getAttributeNamespace(i),
+                                xpp.getAttributeName(i), xpp.getAttributeValue(i));
+                    }
+                    break;
+                case XmlPullParser.TEXT:
+                    xs.text(xpp.getText());
+                    break;
+                case XmlPullParser.END_TAG:
+                    tagName = xpp.getName();
+                    if(endTagName != null && endTagName.equals(tagName))
+                        return;
+
+                    xs.endTag(xpp.getNamespace(), tagName);
+
+
+                    break;
+            }
+            evtType = xpp.next();
+        }
+    }
+
+    public static String passXmlThroughToString(XmlPullParser xpp, String endTagName) throws XmlPullParserException, IOException{
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        XmlSerializer xs = UstadMobileSystemImpl.getInstance().newXMLSerializer();
+        xs.setOutput(bout, "UTF-8");
+        xs.startDocument("UTF-8", Boolean.FALSE);
+        passXmlThrough(xpp, xs, endTagName);
+        xs.endDocument();
+        bout.flush();
+        String retVal = new String(bout.toByteArray());
+        return retVal;
+    }
+
+
     
 }
