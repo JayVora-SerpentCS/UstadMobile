@@ -218,6 +218,7 @@ core/src/main/java/com/ustadmobile/core/buildconfig/CoreBuildConfig.java
 
 #Local buildconfig files
 buildconfig.local.properties
+buildCondif.local.properties
 
 #local variant source files
 app-android/src/localconfig

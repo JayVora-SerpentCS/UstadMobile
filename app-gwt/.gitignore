@@ -2,3 +2,6 @@
 /gwt-unitCache
 /src/main/webapp/WEB-INF/lib/
 /war/WEB-INF/lib/
+config.local.properties
+buildConfig.local.properties
+buildconfig.local.properties

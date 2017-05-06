@@ -1,6 +1,7 @@
-package com.ustadmobile.port.gwt.impl;
+package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.port.gwt.impl.UstadMobileSystemImplGWT;
 
 /**
  * Created by varuna on 5/4/2017.
@@ -8,8 +9,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 public class UstadMobileSystemImplFactory {
 
+    public static UstadMobileSystemImpl makeSystemImpl() {
 
-    public UstadMobileSystemImpl makeUstadSystemImpl() {
         return new UstadMobileSystemImplGWT();
     }
 }

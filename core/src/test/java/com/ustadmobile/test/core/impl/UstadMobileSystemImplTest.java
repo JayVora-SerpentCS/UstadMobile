@@ -236,4 +236,8 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     public String getVersion(Object context) {
         return null;
     }
+
+    @Override
+    public void registerManagers() {
+    }
 }

@@ -29,6 +29,11 @@ import static com.ustadmobile.nanolrs.ormlite.persistence.PersistenceManagerORML
  */
 
 public class UstadMobileSystemImplGWT extends UstadMobileSystemImpl {
+
+    public UstadMobileSystemImplGWT(){
+        System.out.println("UstadMobileSystemImplGWT()");
+    }
+
     @Override
     public void go(String viewName, Hashtable args, Object context) {
 

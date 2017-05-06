@@ -3,7 +3,8 @@ package com.ustadmobile.port.sharedse.persistence.proxy;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 import com.ustadmobile.port.sharedse.persistence.manager.PersonManager;
-import com.ustadmobile.port.sharedse.persistence.util.NanoLrsPlatformTestUtil;
+import com.ustadmobile.port.sharedse.persistence.util.PlatformTestUtil;
+
 
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +26,7 @@ public class TestPerson {
     }
     @Test
     public void testLifeCycle() throws Exception{
-        Object context = NanoLrsPlatformTestUtil.getContext();
+        Object context = PlatformTestUtil.getContext();
 
         String first_name = "Varuna";
         String last_name = "Singh";

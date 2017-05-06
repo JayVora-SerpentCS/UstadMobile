@@ -18,7 +18,6 @@ gwt {
 
 }
 
-
 //To get ustadmobile's nanolrs-jdbc and nanolrs-servlet library
 repositories {
     mavenCentral()
@@ -26,15 +25,45 @@ repositories {
         url "http://devserver2.ustadmobile.com/repo-mvn"
     }
 }
+buildscript {
+    repositories {
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    dependencies {
+        classpath 'gradle.plugin.de.fuerstenau:BuildConfigPlugin:1.1.7'
+    }
+}
+
+ext.buildConfigProperties = new Properties()
+ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.default.properties")))
+if(project.file("buildconfig.local.properties").exists()) {
+    ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.local.properties")))
+}
+
+task generateCoreTestConstantsBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
+    inputs.file("buildconfig.default.properties")
+    inputs.file("buildconfig.local.properties")
+    outputDir = new File("${projectDir}/src/test/java")
+    clsName = "TestConstantsGWT"
+    packageName = "com.ustadmobile.port.gwt.buildconfig"
+
+    buildConfigField "String", "TEST_JDBC_URL", project.ext.buildConfigProperties["test.jdbc.url"]
+}
+compileTestJava.dependsOn(generateCoreTestConstantsBuildConfig)
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':core')
+    testCompile project(":sharedse-tests")
+    compile "com.ustadmobile.nanolrs:nanolrs-jdbc:$nanoLrsVersion"
     compile "com.ustadmobile.nanolrs:nanolrs-ormlite:$nanoLrsVersion"
     compile "com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"
-    compile "com.ustadmobile.nanolrs:nanolrs-jdbc:$nanoLrsVersion"
     compile "com.ustadmobile.nanolrs:nanolrs-servlet:$nanoLrsVersion"
-    testCompile project(":sharedse-tests")
     compile project(path: ':ustadmobile-ormlite')
+
+    ext.testDbDependency = project.ext.buildConfigProperties['test.jdbc.dbDriverDependency']
+    testCompile "$testDbDependency"
 }
 
