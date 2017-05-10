@@ -43,19 +43,18 @@ compileTestJava.dependsOn(generateCoreTestConstantsBuildConfig)
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(":sharedse")
     compile 'junit:junit:4.12'
-
-    //testCompile('')
     compile "com.ustadmobile.nanolrs:nanolrs-jdbc:$nanoLrsVersion"
     compile "com.ustadmobile.nanolrs:nanolrs-ormlite:$nanoLrsVersion"
-    //"com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"
     compile project(path: ':ustadmobile-ormlite')
     compile project(":ustadmobile-ormlite")
     ext.testDbDependency = project.ext.buildConfigProperties['test.jdbc.dbDriverDependency']
     compile "$testDbDependency"
 
-    //testCompile "com.ustadmobile.nanolrs:nanolrs-ormlite:$nanoLrsVersion"
+    compile project(":core")
+    compile project(":core-tests")
+    compile project(":sharedse")
+
 }
 
 sourceCompatibility = "1.7"

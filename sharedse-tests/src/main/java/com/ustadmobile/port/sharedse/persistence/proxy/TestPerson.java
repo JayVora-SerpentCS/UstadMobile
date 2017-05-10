@@ -4,7 +4,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 import com.ustadmobile.port.sharedse.persistence.manager.PersonManager;
 import com.ustadmobile.port.sharedse.persistence.util.PlatformTestUtil;
-import com.ustadmobile.port.sharedse.test.RegisterManagersSharedSe;
 
 
 import java.util.List;
@@ -28,9 +27,6 @@ public class TestPerson {
         //we should do it this way:
         //Register Manager using Implementation's init.
         UstadMobileSystemImpl.getInstance().init(PlatformTestUtil.getContext());
-        
-        //Register using sharedse-test's test register class:
-        //RegisterManagersSharedSe.registerMe();
 
     }
     @Test
