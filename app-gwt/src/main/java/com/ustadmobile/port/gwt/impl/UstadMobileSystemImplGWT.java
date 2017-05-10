@@ -35,6 +35,14 @@ public class UstadMobileSystemImplGWT extends UstadMobileSystemImpl {
     }
 
     @Override
+    public void init(Object context) {
+        //TODO: Uncomment this. We havent implemented super's init yet.
+        //super.init(context);
+        //Register managers
+        registerManagers();
+    }
+
+    @Override
     public void go(String viewName, Hashtable args, Object context) {
 
     }
@@ -307,7 +315,7 @@ public class UstadMobileSystemImplGWT extends UstadMobileSystemImpl {
     @Override
     public void registerManagers() {
         //sup?
-        System.out.println("sup");
+        System.out.println("GWT Implementtion of UMSysImpl registerManager:");
         registerManagerImplementation(PersonManager.class, PersonManagerOrmLite.class);
     }
 }

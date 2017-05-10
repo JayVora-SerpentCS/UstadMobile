@@ -9,7 +9,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
+import com.ustadmobile.port.sharedse.persistence.manager.PersonManager;
+import com.ustadmobile.port.sharedse.persistence.proxy.Person;
 import com.ustadmobile.test.core.impl.se.UMTestLogger;
 
 import org.json.JSONObject;
@@ -68,6 +71,12 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
         }
 
         return tmpDir;
+    }
+
+    @Override
+    public void init(Object context) {
+        //TODO: Uncomment THIS.
+        //super.init(context); //Uncommenting since the file bits havent been figured out.
     }
 
     @Override
@@ -239,5 +248,8 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
 
     @Override
     public void registerManagers() {
+
     }
+
+
 }
