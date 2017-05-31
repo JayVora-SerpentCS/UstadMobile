@@ -5,8 +5,10 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
+import com.ustadmobile.port.ormlite.persistence.manager.ClazzManagerOrmLite;
 import com.ustadmobile.port.ormlite.persistence.manager.PersonManagerOrmLite;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
+import com.ustadmobile.port.sharedse.persistence.manager.ClazzManager;
 import com.ustadmobile.port.sharedse.persistence.manager.PersonManager;
 
 
@@ -66,8 +68,7 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
 
     @Override
     public void init(Object context) {
-        //TODO: Uncomment THIS.
-        //super.init(context); //Uncommenting since the file bits havent been figured out.
+        //super.init(context);
         registerManagers();
     }
 
@@ -242,6 +243,7 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     public void registerManagers() {
         System.out.println("SharedSe's Implementtion of UMSysImpl registerManager:");
         registerManagerImplementation(PersonManager.class, PersonManagerOrmLite.class);
+        registerManagerImplementation(ClazzManager.class, ClazzManagerOrmLite.class);
     }
 
 

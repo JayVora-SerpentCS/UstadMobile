@@ -3,7 +3,10 @@ package com.ustadmobile.port.sharedse.persistence.util;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
+import com.ustadmobile.port.ormlite.persistence.generated.model.ClazzEntity;
+import com.ustadmobile.port.ormlite.persistence.generated.model.OrganisationEntity;
 import com.ustadmobile.port.ormlite.persistence.generated.model.PersonEntity;
+import com.ustadmobile.port.ormlite.persistence.generated.model.SchoolEntity;
 import com.ustadmobile.port.sharedse.buildconfig.TestConstantsSharedSe;
 
 import java.sql.SQLException;
@@ -44,7 +47,7 @@ public class PlatformTestUtil {
 
     public static Class[] TABLE_CLASSES = new Class[]{
             //Person.class, AnotherEntity.class, .. etc
-            PersonEntity.class
+            PersonEntity.class, ClazzEntity.class, OrganisationEntity.class, SchoolEntity.class,
     };
 }
 

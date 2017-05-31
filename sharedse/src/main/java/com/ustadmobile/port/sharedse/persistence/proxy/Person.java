@@ -1,7 +1,9 @@
 package com.ustadmobile.port.sharedse.persistence.proxy;
 
+import com.j256.ormlite.field.types.DateTimeType;
 import com.ustadmobile.nanolrs.core.manager.NanoLrsManager;
 import com.ustadmobile.nanolrs.core.model.NanoLrsModel;
+import com.ustadmobile.port.sharedse.persistence.PrimaryKeyAnnotationClass;
 
 /**
  * TODO: This should extend NanoLrs's BaseModel for things like
@@ -11,6 +13,7 @@ import com.ustadmobile.nanolrs.core.model.NanoLrsModel;
  *
  * Created by Varuna on 4/30/2017.
  */
+
 public interface Person extends NanoLrsModel{
 
     /**
@@ -20,17 +23,79 @@ public interface Person extends NanoLrsModel{
      *
      * @return
      */
+    @PrimaryKeyAnnotationClass(str = "pk")
     String getUUID();
-
-    String getFirstName();
-
-    String getLastName();
-
-    void setFirstName(String firstName);
-
-    void setLastName(String lastName);
 
     void setUUID(String uuid);
 
+    String getFirstName();
+    void setFirstName(String firstName);
+
+    String getLastName();
+    void setLastName(String lastName);
+
+    DateTimeType getLastLogin();
+    void setLastLogin(DateTimeType lastLogin);
+
+    boolean isSuperuser();
+    void setSuperuser(boolean superuser);
+
+    String getEmail();
+    void setEmail(String email);
+
+    boolean isStaff();
+    void setStaff(boolean staff);
+
+    boolean isActive();
+    void setActive(boolean active);
+
+    DateTimeType getDateJoined();
+    void setDateJoined(DateTimeType dateJoined);
+
+    String getWebsite();
+    void setWebsite(String website);
+
+    String getCompanyName();
+    void setCompanyName(String companyName);
+
+    String getJobTitle();
+    void setJobTitle(String jobTitle);
+
+    DateTimeType getDateOfBirth();
+    void setDateOfBirth(DateTimeType dateOfBirth);
+
+    String getAddress();
+    void setAddress(String address);
+
+    String getPhoneNumber();
+    void setPhoneNumber(String phoneNumber);
+
+    String getGender();
+    void setGender(String gender);
+
+    boolean isAdminApproved();
+    void setAdminApproved(boolean adminApproved);
+
+    Organisation getOrganisationRequested();
+    void setOrganisationRequested(Organisation organisationRequested);
+
+    //Image: avatar avatar = ImageField
+
+    String getNotes();
+    void setNotes(String notes);
+
+    DateTimeType getLastActivityDate();
+    void setLastActivityDate(DateTimeType lastActivityDate);
+
+    String getCustomRollNumber();
+    void setCustomRollNumber(String customRollNumber);
+
+    /* NEW: Setting organisation from Person itself - Might not need UserOrganisation*/
+    Organisation getOrganisation();
+    void setOrganisation(Organisation organisation);
+
+    /* NEW: Setting role from Person itself - Might not need UserRole*/
+    Role getRole();
+    void setRole(Role role);
 
 }
