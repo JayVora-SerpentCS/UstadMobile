@@ -15,6 +15,7 @@ import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 
 import org.json.JSONObject;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -32,6 +33,8 @@ public class TestWifiDirectGroupConnection {
 
     @Test
     public void testWifiDirectGroupConnection() throws IOException{
+        NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        Assume.assumeTrue("WiFi is available and enabled", manager.isWiFiEnabled());
         String createGroupUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd="
                 + RemoteTestServerHttpd.CMD_CREATEGROUP;
         HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(createGroupUrl, null, null);
@@ -44,7 +47,7 @@ public class TestWifiDirectGroupConnection {
         Assert.assertNotNull("Got ssid", ssid);
         Assert.assertNotNull("Got passphrase", passphrase);
 
-        NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+
         final String[] connectedSsid = new String[1];
         final Object connectionLock = new Object();
         NetworkManagerListener listener = new NetworkManagerListener() {
@@ -74,10 +77,12 @@ public class TestWifiDirectGroupConnection {
             }
 
             @Override
-            public void wifiConnectionChanged(String ssid) {
-                connectedSsid[0] = ssid;
-                synchronized (connectionLock) {
-                    connectionLock.notify();
+            public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
+                if(connected) {
+                    connectedSsid[0] = ssid;
+                    synchronized (connectionLock) {
+                        connectionLock.notify();
+                    }
                 }
             }
 
@@ -88,13 +93,24 @@ public class TestWifiDirectGroupConnection {
 
         };
         manager.addNetworkManagerListener(listener);
-        manager.connectWifi(ssid, passphrase);
+        manager.connectToWifiDirectGroup(ssid, passphrase);
         synchronized (connectionLock) {
             try {connectionLock.wait(CONNECTION_TIMEOUT);}
             catch(InterruptedException e) {}
         }
 
         Assert.assertEquals("Connected to created group ssid", ssid, connectedSsid[0]);
+
+        try { Thread.sleep(10000); }
+        catch(InterruptedException e) {}
+
+        manager.restoreWifi();
+        synchronized (connectionLock) {
+            try { connectionLock.wait(CONNECTION_TIMEOUT); }
+            catch(InterruptedException e) {}
+        }
+
+        Assert.assertNotEquals("Connected back to 'normal' wifi", ssid,connectedSsid[0]);
     }
 
 }

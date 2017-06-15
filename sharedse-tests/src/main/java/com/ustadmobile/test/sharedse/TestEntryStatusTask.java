@@ -90,7 +90,7 @@ public class TestEntryStatusTask{
             }
 
             @Override
-            public void wifiConnectionChanged(String ssid) {
+            public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
 
             }
 

@@ -332,10 +332,6 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
 
     }
 
-    @Override
-    public void wifiConnectionChanged(String ssid) {
-
-    }
 
     @Override
     public void wifiDirectConnected(boolean isDeviceConnected) {
@@ -375,6 +371,11 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
         setToolbarTitle(title);
         setViewsVisibility(isDeviceConnected);
         refreshDeviceList();
+    }
+
+    @Override
+    public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
+
     }
 
 

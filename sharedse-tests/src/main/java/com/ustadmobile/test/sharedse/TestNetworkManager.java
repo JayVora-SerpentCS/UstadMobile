@@ -77,7 +77,7 @@ public class TestNetworkManager {
             }
 
             @Override
-            public void wifiConnectionChanged(String ssid) {
+            public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
 
             }
 
@@ -95,7 +95,7 @@ public class TestNetworkManager {
         HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(enableNodeUrl, null, null);
         Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
 
-        if(manager.getNodeByBluetoothAddr(TEST_REMOTE_BLUETOOTH_DEVICE) == null) {
+        if(manager  .getNodeByBluetoothAddr(TEST_REMOTE_BLUETOOTH_DEVICE) == null) {
             synchronized (nodeDiscoveryLock) {
                 try { nodeDiscoveryLock.wait(NODE_DISCOVERY_TIMEOUT ); }
                 catch(InterruptedException e ) {
@@ -176,7 +176,7 @@ public class TestNetworkManager {
             }
 
             @Override
-            public void wifiConnectionChanged(String ssid) {
+            public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
 
             }
 
