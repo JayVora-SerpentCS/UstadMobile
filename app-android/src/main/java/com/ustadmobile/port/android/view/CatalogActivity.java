@@ -20,6 +20,7 @@ import android.widget.ListView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.BasePointController;
+import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
@@ -70,6 +71,8 @@ public class CatalogActivity extends UstadBaseActivity  {
 
         return super.onOptionsItemSelected(item);
     }
+
+
 
 
 }

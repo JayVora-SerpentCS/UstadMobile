@@ -17,6 +17,7 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerListener;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkTask;
+import com.ustadmobile.port.sharedse.networkmanager.WifiDirectInfo;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.core.impl.ClassResourcesResponder;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
@@ -151,7 +152,10 @@ public class TestAcquisitionTask{
 
             }
 
+            @Override
+            public void wifiDirectConnected(boolean isDeviceConnected) {
 
+            }
         };
         manager.addNetworkManagerListener(responseListener);
         //enable supernode mode on the remote test device

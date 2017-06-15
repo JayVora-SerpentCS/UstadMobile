@@ -49,6 +49,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
 
     public static final String PREFIX_MOUNT = "/mount/";
 
+
     /**
      * Hashtable mapping (String)FILENAME_EXTENSION -> (String)MIME_TYPE
      */
@@ -98,8 +99,9 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
         //mountedEPUBs = new HashMap<>();
         id = idCounter;
         idCounter++;
-
         //TODO: Setup 404 handling
+
+
     }
 
     @Override

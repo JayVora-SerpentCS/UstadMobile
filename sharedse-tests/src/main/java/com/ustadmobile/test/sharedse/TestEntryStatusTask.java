@@ -7,6 +7,7 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerListener;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkTask;
+import com.ustadmobile.port.sharedse.networkmanager.WifiDirectInfo;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
@@ -93,6 +94,10 @@ public class TestEntryStatusTask{
 
             }
 
+            @Override
+            public void wifiDirectConnected(boolean isDeviceConnected) {
+
+            }
 
         };
         manager.addNetworkManagerListener(responseListener);

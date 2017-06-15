@@ -2,8 +2,6 @@ package com.ustadmobile.port.android.impl.http;
 
 
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
-
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;

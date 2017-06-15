@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    tools:context="com.ustadmobile.port.android.view.CourseSharingActivity">
+    <android.support.design.widget.AppBarLayout
+        android:elevation="@dimen/dimen_4dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <android.support.v7.widget.Toolbar
+            android:background="@color/primary"
+            android:layout_width="match_parent"
+            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            android:id="@+id/course_sharing_toolbar"
+            android:layout_height="60dp">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    android:layout_toLeftOf="@+id/receive_share_content"
+                    android:gravity="center_vertical"
+                    android:layout_weight="2"
+                    android:id="@+id/toolbarTitle"
+                    android:textSize="@dimen/text_title"
+                    android:textColor="@color/icons"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+                <android.support.v7.widget.SwitchCompat
+                    android:layout_marginEnd="@dimen/dimen_10dp"
+                    android:layout_marginRight="@dimen/dimen_10dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:id="@+id/receive_share_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </RelativeLayout>
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+
+    <RelativeLayout
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+        <android.support.v7.widget.RecyclerView
+            android:layout_weight="1"
+            android:id="@+id/all_found_nodes_to_share_course"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <android.support.v7.widget.CardView
+            android:visibility="gone"
+            android:id="@+id/connected_device_details_holder"
+            android:layout_margin="@dimen/dimen_10dp"
+            android:elevation="@dimen/dimen_2dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:paddingBottom="@dimen/dimen_16dp"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:textColor="@color/text_primary"
+                    android:id="@+id/network_name"
+                    android:lines="1"
+                    android:text="Network Name here"
+                    android:textSize="@dimen/text_title"
+                    android:padding="@dimen/dimen_16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:id="@+id/device_address"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/text_body"
+                    android:text="Address 00:00:00"
+                    android:paddingLeft="@dimen/dimen_16dp"
+                    android:paddingStart="@dimen/dimen_16dp"
+                    android:paddingEnd="@dimen/dimen_16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <ProgressBar
+                    android:visibility="gone"
+                    android:id="@+id/fileReceivingProgressBar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_marginTop="@dimen/dimen_16dp"
+                    android:layout_marginLeft="@dimen/dimen_16dp"
+                    android:layout_marginStart="@dimen/dimen_16dp"
+                    android:layout_marginEnd="@dimen/dimen_16dp"
+                    android:layout_marginRight="@dimen/dimen_16dp"
+                    android:layout_width="match_parent"
+                    android:progress="45"
+                    android:max="100"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:visibility="gone"
+                    android:text="Receiving My little .."
+                    android:id="@+id/receivingFileNameView"
+                    android:layout_marginTop="@dimen/dimen_10dp"
+                    android:layout_marginLeft="@dimen/dimen_16dp"
+                    android:layout_marginStart="@dimen/dimen_16dp"
+                    android:layout_marginEnd="@dimen/dimen_16dp"
+                    android:layout_marginRight="@dimen/dimen_16dp"
+                    android:textSize="@dimen/text_caption"
+                    android:textColor="@color/text_secondary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+
+        <ProgressBar
+            android:visibility="gone"
+            android:id="@+id/progressBarWaiting"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+</LinearLayout>

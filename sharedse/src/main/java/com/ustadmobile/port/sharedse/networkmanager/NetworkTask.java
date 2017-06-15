@@ -102,4 +102,5 @@ public abstract class NetworkTask {
     public void setUseHttp(boolean useHttp) {
         this.useHttp = useHttp;
     }
+
 }

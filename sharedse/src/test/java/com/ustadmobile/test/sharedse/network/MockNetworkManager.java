@@ -430,4 +430,15 @@ public class MockNetworkManager extends NetworkManager {
     public void shareAppSetupFile(String filePath, String shareTitle) {
         //TODO: implement this.test
     }
+
+    @Override
+    public void startContentSharing(String deviceName, boolean isReceivingContent) {
+
+    }
+
+
+    @Override
+    public void connectWifiDirect(String deviceMacAddress) {
+
+    }
 }

@@ -15,6 +15,9 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WpsInfo;
+import android.net.wifi.p2p.WifiP2pConfig;
+import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
@@ -23,14 +26,10 @@ import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.j256.ormlite.dao.ForeignCollection;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.nanolrs.core.model.XapiUser;
-import com.ustadmobile.nanolrs.ormlite.generated.model.XapiUserEntity;
 import com.ustadmobile.port.android.impl.http.AndroidAssetsHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
@@ -46,10 +45,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -57,11 +53,11 @@ import java.util.List;
 import java.util.Map;
 
 import edu.rit.se.wifibuddy.DnsSdTxtRecord;
+import edu.rit.se.wifibuddy.FailureReason;
 import edu.rit.se.wifibuddy.ServiceData;
 import edu.rit.se.wifibuddy.ServiceType;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
 
 /**
@@ -124,6 +120,7 @@ public class NetworkManagerAndroid extends NetworkManager{
     private static final String serverNotificationTitle="Super Node Active";
 
     private static final String serverNotificationMessage ="You can share files with other devices";
+    private static final String receivingCourseNotificationMessage ="Waiting for the files..";
 
     private WifiManager wifiManager;
 
@@ -136,11 +133,17 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private int previousConnectedNetId=-1;
 
+
+    private HashMap<String,String> dnsTextRecords=null;
+
+    private boolean isSharingContent =false;
+
     /**
      * Assets are served over http that are used to interact with the content (e.g. to inject a
      * javascript into the content that handles autoplay).
      */
     private String httpAndroidAssetsPath;
+
 
     /**
      * All activities bind to NetworkServiceAndroid. NetworkServiceAndroid will call this init
@@ -174,6 +177,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         filter.addAction(WifiDirectHandler.Action.WIFI_STATE_CHANGED);
         filter.addAction(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE);
         filter.addAction(WifiDirectHandler.Action.NOPROMPT_GROUP_CREATION_ACTION);
+        filter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         LocalBroadcastManager.getInstance(networkService).registerReceiver(mBroadcastReceiver, filter);
 
         IntentFilter intentFilter = new IntentFilter();
@@ -210,7 +214,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Toast.makeText(networkService,intent.getAction(),Toast.LENGTH_LONG).show();
+            Log.d(TAG,"Received action "+intent.getAction());
             switch (intent.getAction()){
 
                 case WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE:
@@ -228,8 +232,18 @@ public class NetworkManagerAndroid extends NetworkManager{
                         handleWifiDirectGroupCreated(new WiFiDirectGroup(wifiP2pGroup.getNetworkName(),
                                 wifiP2pGroup.getPassphrase()));
                     }
-            }
+                    break;
 
+                case WifiDirectHandler.Action.DEVICE_CHANGED:
+                    WifiP2pInfo wifiP2pInfo=networkService.getWifiDirectHandlerAPI().getWifiP2pInfo();
+                    if(networkService.getWifiDirectHandlerAPI().getWifiP2pInfo()!=null){
+                        boolean isDeviceConnected=networkService.getWifiDirectHandlerAPI().getThisDevice().status==WifiP2pDevice.CONNECTED;
+                        handleWifiDirectConnectionChanged(isDeviceConnected);
+
+                    }
+                    break;
+
+            }
         }
     };
 
@@ -261,13 +275,21 @@ public class NetworkManagerAndroid extends NetworkManager{
            WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
            wifiDirectHandler.stopServiceDiscovery();
            wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
-           wifiDirectHandler.addLocalService(NETWORK_SERVICE_NAME, localService());
-           bluetoothServerAndroid.start();
            if(nsdHelperAndroid.isDiscoveringNetworkService()){
                nsdHelperAndroid.stopNSDiscovery();
            }
-           nsdHelperAndroid.registerNSDService();
-           addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, serverNotificationMessage);
+           if(!isSharingContent){
+               dnsTextRecords=getDnsTextRecords();
+               nsdHelperAndroid.registerNSDService();
+           }
+           Log.d("DNS",dnsTextRecords.toString());
+           wifiDirectHandler.addLocalService(NETWORK_SERVICE_NAME,dnsTextRecords);
+           bluetoothServerAndroid.start();
+           if(isSharingContent){
+               addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, receivingCourseNotificationMessage);
+           }else{
+               addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, serverNotificationMessage);
+           }
            isSuperNodeEnabled=true;
            nodeStatus = NODE_STATUS_SUPERNODE_RUNNING;
        }
@@ -280,15 +302,37 @@ public class NetworkManagerAndroid extends NetworkManager{
             if(mBuilder!=null && mNotifyManager!=null){
                 removeNotification(NOTIFICATION_TYPE_SERVER);
             }
+
             wifiDirectHandler.removeService();
             wifiDirectHandler.continuouslyDiscoverServices();
 
-            nsdHelperAndroid.startNSDiscovery();
-            bluetoothServerAndroid.stop();
+            if(!isSharingContent){
+                nsdHelperAndroid.startNSDiscovery();
+                bluetoothServerAndroid.stop();
+            }else {
+                nsdHelperAndroid.stopNSDiscovery();
+            }
             isSuperNodeEnabled=false;
             nodeStatus = NODE_STATUS_CLIENT_RUNNING;
         }
     }
+
+    @Override
+    public void startContentSharing(String deviceName,boolean isReceivingContent) {
+        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
+        isSharingContent =true;
+        if(wifiDirectHandler!=null && !isReceivingContent){
+            dnsTextRecords=getDnsTextRecords();
+            dnsTextRecords.remove(SD_TXT_KEY_BT_MAC);
+            dnsTextRecords.remove(SD_TXT_KEY_PORT);
+            dnsTextRecords.remove(SD_TXT_KEY_IP_ADDR);
+            dnsTextRecords.put(SD_TXT_KEY_DV_NAME,deviceName);
+            setSuperNodeEnabled(getContext(),isReceivingContent);
+
+        }
+
+    }
+
 
 
     @Override
@@ -403,12 +447,9 @@ public class NetworkManagerAndroid extends NetworkManager{
      * This constructs a map of DNS-Text records to be associated with the service
      * @return HashMap : Constructed DNS-Text records.
      */
-    private HashMap<String,String> localService(){
-        boolean isConnected= connectivityManager!=null &&
-                connectivityManager.getActiveNetworkInfo().getType()
-                == ConnectivityManager.TYPE_WIFI;
+    private HashMap<String,String> getDnsTextRecords(){
         String deviceBluetoothMacAddress=getBluetoothMacAddress();
-        String deviceIpAddress=isConnected ? getDeviceIPAddress():"";
+        String deviceIpAddress=getDeviceIPAddress();
         HashMap<String,String> record=new HashMap<>();
         record.put(SERVICE_DEVICE_AVAILABILITY,"available");
         record.put(SD_TXT_KEY_PORT,String.valueOf(getHttpListeningPort()));
@@ -466,7 +507,6 @@ public class NetworkManagerAndroid extends NetworkManager{
         getContext().startActivity(chooserIntent);
     }
 
-
     /**
      * Method to get platform dependent application context
      * which may be referenced from different parts of the app.
@@ -477,41 +517,44 @@ public class NetworkManagerAndroid extends NetworkManager{
     }
 
     /**
+     * Method which is responsible to get WifiDirectHandler reference
+     * @return WifiDirectHandler
+     */
+    public WifiDirectHandler getWifiDirectHandler(){
+        return networkService.getWifiDirectHandlerAPI();
+    }
+
+    /**
      * @exception NullPointerException
      * @exception SocketException
      */
     @Override
     public String getDeviceIPAddress() {
-        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
-        if (info != null && info.isConnected()){
-            if(info.getTypeName().equalsIgnoreCase("WIFI")) {
-                try {
-                    for (Enumeration<NetworkInterface> enumInterface = NetworkInterface.getNetworkInterfaces();
-                         enumInterface.hasMoreElements();) {
+        try {
+            for (Enumeration<NetworkInterface> enumInterface = NetworkInterface.getNetworkInterfaces();
+                 enumInterface.hasMoreElements();) {
 
-                        NetworkInterface networkInterface = enumInterface.nextElement();
-                        for (Enumeration<InetAddress> enumIPAddress = networkInterface.getInetAddresses();
-                             enumIPAddress.hasMoreElements();) {
-                            InetAddress inetAddress = enumIPAddress.nextElement();
-                            if (!inetAddress.isLoopbackAddress()) {
-                                String ipAddress ="";
-                                if (inetAddress instanceof Inet4Address) {
+                NetworkInterface networkInterface = enumInterface.nextElement();
+                for (Enumeration<InetAddress> enumIPAddress = networkInterface.getInetAddresses();
+                     enumIPAddress.hasMoreElements();) {
+                    InetAddress inetAddress = enumIPAddress.nextElement();
+                    if (!inetAddress.isLoopbackAddress()) {
+                        String ipAddress ="";
+                        if (inetAddress instanceof Inet4Address) {
 
-                                    for (int i=0; i<inetAddress.getAddress().length; i++) {
-                                        if (i > 0) {
-                                            ipAddress += ".";
-                                        }
-                                        ipAddress += inetAddress.getAddress()[i]&0xFF;
-                                    }
-                                    return ipAddress;
+                            for (int i=0; i<inetAddress.getAddress().length; i++) {
+                                if (i > 0) {
+                                    ipAddress += ".";
                                 }
+                                ipAddress += inetAddress.getAddress()[i]&0xFF;
                             }
+                            return ipAddress;
                         }
                     }
-                } catch (SocketException | NullPointerException ex) {
-                    ex.printStackTrace();
                 }
             }
+        } catch (SocketException | NullPointerException ex) {
+            ex.printStackTrace();
         }
 
         return null;
@@ -613,6 +656,44 @@ public class NetworkManagerAndroid extends NetworkManager{
         }
     }
 
+
+    @Override
+    public void connectWifiDirect(final String deviceMacAddress) {
+
+        /*
+         * Normal Wifi Direct connection doesn't guarantee of any of the device to be a group owner,
+         * group owner will be decided after GO negotiation.But if you need to specify device which
+         * will own a group you have to set groupOwnerIntent before connection.
+
+         * GroupOwnerIntent vary between  0-15.
+         * 0 - means that device which will be requesting to connect is likely to be a client
+         * 15- means it will be a group owner
+         *
+         * */
+
+        WifiP2pManager.Channel channel = networkService.getWifiDirectHandlerAPI().getWiFiDirectChannel();
+        WifiP2pManager manager = networkService.getWifiDirectHandlerAPI().getWifiDirectP2pManager();
+        if (manager != null) {
+            WifiP2pConfig wifiP2pConfig = new WifiP2pConfig();
+            wifiP2pConfig.deviceAddress = deviceMacAddress;
+            wifiP2pConfig.groupOwnerIntent=15;
+            wifiP2pConfig.wps.setup = WpsInfo.PBC;
+            manager.connect(channel, wifiP2pConfig, new WifiP2pManager.ActionListener() {
+                @Override
+                public void onSuccess() {
+                    Log.i(TAG, "Initiating connection to service");
+                }
+
+                @Override
+                public void onFailure(int reason) {
+                    Log.e(TAG, "Failure initiating connection to service: " + FailureReason.fromInteger(reason).toString());
+                }
+            });
+        } else {
+            Log.e(TAG, "WifiDirectHandler: initiateConnectToService: wifip2pManager is null");
+        }
+    }
+
     //TODO: Add a status flag for removal requested
     @Override
     public synchronized void removeWiFiDirectGroup() {
@@ -671,5 +752,14 @@ public class NetworkManagerAndroid extends NetworkManager{
     public String getHttpAndroidAssetsUrl() {
         return UMFileUtil.joinPaths(new String[]{"http://127.0.0.1:" + httpd.getListeningPort()
             + "/" + httpAndroidAssetsPath});
+    }
+
+    /**
+     * Method which is responsible for setting up status when content
+     * sharing between peer device is started
+     * @param sharingContent TRUE when sharing content otherwise FALSE
+     */
+    public void setSharingContent(boolean sharingContent) {
+        isSharingContent = sharingContent;
     }
 }

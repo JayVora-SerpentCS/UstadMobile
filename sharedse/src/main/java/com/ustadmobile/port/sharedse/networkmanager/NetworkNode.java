@@ -16,6 +16,7 @@ public class NetworkNode {
     private long wifiDirectLastUpdated;
     private long networkServiceLastUpdated;
     private int port;
+    private String deviceName;
 
     /**
      * Creating a NetworkNode
@@ -124,6 +125,22 @@ public class NetworkNode {
      */
     public void setNetworkServiceLastUpdated(long networkServiceLastUpdated) {
         this.networkServiceLastUpdated = networkServiceLastUpdated;
+    }
+
+    /**
+     * Method which is responsible to get device name
+     * @return String: Device name
+     */
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    /**
+     * Method which is responsible to set device name
+     * @param deviceName
+     */
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
     }
 
     @Override

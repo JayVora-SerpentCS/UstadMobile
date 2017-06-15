@@ -272,7 +272,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     /**
      * The user was asked to choose from a list of available registrations: handle choice
      *
-     * @param commandId The command id that was supplied when using showChoiceDialog
+     * @param commandId The command id that was supplied when using showConfirmationDialog
      * @param choice
      */
     @Override

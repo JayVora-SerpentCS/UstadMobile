@@ -78,7 +78,8 @@
         <activity
             android:name="com.ustadmobile.port.android.view.UserSettingsActivity2"
             android:label="@string/title_activity_settings"
-            android:theme="@style/Theme.UstadTheme"></activity>
+            android:theme="@style/Theme.UstadTheme" />
+        <activity android:name="com.ustadmobile.port.android.view.CourseSharingActivity"></activity>
     </application>
 
 </manifest>

@@ -190,16 +190,27 @@ public class MessageIDConstants {
     public static final int students = 108;
 
     public static final int connection = 123;
+
     public static final int dataUsage = 109;
+
     public static final int dataUsageLabel =124;
+
     public static final int resetCounterLabel=114;
+
     public static final int usageStatistics=115;
+
     public static final int cell_data_label=116;
+
     public static final int wifi_data_label=117;
+
     public static final int data_label=118;
+
     public static final int p2pConnectionLabel=119;
+
     public static final int nodeListTitle=120;
+
     public static final int fileAvailableLocally=121;
+
     public static final int fileUnAvailableLocally=122;
 
     public static final int notifications = 110;
@@ -207,17 +218,44 @@ public class MessageIDConstants {
     public static final int forgot_password = 111;
 
     public static final int settingsAccountLabel=125;
+
     public static final int settingsDataUsageLabel=126;
+
     public static final int settingsLanguageLabel=127;
+
     public static final int welcomeTitle=128;
+
     public static final int topQuoteMessage=129;
+
     public static final int downloadTextContent=130;
+
     public static final int learnTextContent=131;
+
     public static final int inpersonClassesTextContent=132;
+
     public static final int languageSelectionNote=133;
+
     public static final int neverShowThisNextTime=134;
+
     public static final int acceptButton=135;
+
     public static final int enableSuperNode=136;
+
     public static final int shareAppSetup=137;
+
     public static final int shareAppDialogTitle=138;
+
+    public static final int shareCourseContent=139;
+
+    public static final int receiveSharedCourse=140;
+
+    public static final int chooseDeviceToShareWith=141;
+
+    public static final int deviceConnectedTo=142;
+
+    public static final int deviceAddressLabel=143;
+
+    public static final int shareDialogChoiceTitle=144;
+
+    public static final int shareDialogChoiceMessage=145;
 }

@@ -1084,6 +1084,13 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract String getAppSetupFile(Object context);
 
+    /**
+     * Return device name to be put in DNS-Text record
+     * @param context System context
+     * @return String: Device name
+     */
+    public abstract String getDeviceName(Object context);
+
 
 }
 

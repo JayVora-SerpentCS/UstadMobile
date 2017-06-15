@@ -1,5 +1,4 @@
 package com.ustadmobile.port.sharedse.networkmanager;
-
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
@@ -91,6 +90,10 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     public static final String SD_TXT_KEY_BT_MAC = "b";
 
     /**
+     * Tag to hold device name value in DNS-Text record
+     */
+    public static final String SD_TXT_KEY_DV_NAME = "dn";
+    /**
      * Tag to hold device service port value in DNS-Text record
      */
     public static final String SD_TXT_KEY_PORT = "port";
@@ -131,7 +134,12 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
 
     private Map<String,AcquisitionTask> entryAcquisitionTaskMap=new HashMap<>();
 
+    public static final int SERVICE_PORT_NUMBER=8001;
+
     protected EmbeddedHTTPD httpd;
+
+
+    private NetworkNode currentConnectedPeerNode;
 
     public NetworkManager() {
     }
@@ -166,7 +174,7 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         this.mContext = mContext;
 
         try {
-            httpd = new EmbeddedHTTPD(0);
+            httpd = new EmbeddedHTTPD(SERVICE_PORT_NUMBER);
             httpd.addRoute("/catalog/(.)+", CatalogUriResponder.class, mContext, new WeakHashMap());
             NanoLrsHttpd.mountXapiEndpointsOnServer(httpd, mContext, "/xapi/");
             httpd.start();
@@ -264,6 +272,28 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     }
 
     /**
+     * Method which invoked when making file acquisition request during peer-peer file sharing.
+     * @param feed OPDS file feed
+     * @param mContext application context
+     * @param localNetworkEnabled Whether to involve local network as means of acquiring,
+     *                            TRUE if yes, FALSE otherwise.
+     * @param wifiDirectEnabled Whether to involve Wi-Fi direct group as means of acquiring,
+     *                          TRUE if yes , otherwise FALSE.
+     * @param isPeerConnection TRUE when is peer-to-peer connection
+     * @return
+     */
+    public UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed,Object mContext,
+                                              boolean localNetworkEnabled, boolean wifiDirectEnabled,boolean isPeerConnection){
+        AcquisitionTask task=new AcquisitionTask(feed,this);
+        task.setTaskType(QUEUE_ENTRY_ACQUISITION);
+        task.setLocalNetworkDownloadEnabled(localNetworkEnabled);
+        task.setWifiDirectDownloadEnabled(wifiDirectEnabled);
+        task.setP2PConnectionEnabled(isPeerConnection);
+        queueTask(task);
+        return feed;
+    }
+
+    /**
      * Creating task que as per request received.
      * @param task Network task to be queued
      * @return NetworkTask: Queued NetworkTask
@@ -297,9 +327,10 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      */
     public void handleWifiDirectSdTxtRecordsAvailable(String serviceFullDomain,String senderMacAddr, HashMap<String, String> txtRecords) {
         if(serviceFullDomain.contains(NETWORK_SERVICE_NAME)){
-            String ipAddr = txtRecords.get(SD_TXT_KEY_IP_ADDR);
-            String btAddr = txtRecords.get(SD_TXT_KEY_BT_MAC);
-            int port=Integer.parseInt(txtRecords.get(SD_TXT_KEY_PORT));
+            String ipAddr = txtRecords.get(SD_TXT_KEY_IP_ADDR)==null? null: txtRecords.get(SD_TXT_KEY_IP_ADDR);
+            String btAddr = txtRecords.get(SD_TXT_KEY_BT_MAC)==null ? null: txtRecords.get(SD_TXT_KEY_BT_MAC);
+            String deviceName=txtRecords.get(SD_TXT_KEY_DV_NAME)==null ? null:txtRecords.get(SD_TXT_KEY_DV_NAME);
+            int port=txtRecords.get(SD_TXT_KEY_PORT)==null ? 0 :Integer.parseInt(txtRecords.get(SD_TXT_KEY_PORT));
 
             boolean newNode;
             NetworkNode node = null;
@@ -321,6 +352,7 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
                 node.setDeviceWifiDirectMacAddress(senderMacAddr);
                 node.setPort(port);
                 node.setWifiDirectLastUpdated(Calendar.getInstance().getTimeInMillis());
+                node.setDeviceName(deviceName);
             }
 
 
@@ -519,11 +551,19 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     }
 
     /**
-     * Method which will be called to fire all Wi-Fi Direct connection events
+     * Method which will be called to fire all Wi-Fi Direct Group connection events
      * @param ssid SSID of the current connected Wi-Fi Direct group.
      */
     public void handleWifiDirectConnectionChanged(String ssid){
         fireWiFiConnectionChanged(ssid);
+    }
+
+    /**
+     * method which will be called to fire all Wi-Fi Direct connection ebents
+     * @param isDeviceConnected Device connection status
+     */
+    public void handleWifiDirectConnectionChanged(boolean isDeviceConnected){
+        fireWiFiDirectConnectionChanged(isDeviceConnected);
     }
 
     /**
@@ -603,6 +643,19 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         synchronized (networkManagerListeners) {
             for(NetworkManagerListener listener : networkManagerListeners){
                 listener.wifiConnectionChanged(ssid);
+            }
+        }
+    }
+
+    /**
+     * method which will be firing events to all listening part of the app to notify
+     * that WiFi Direction connection has been made successfully
+     * @param isDeviceConnected Device connection status
+     */
+    protected void fireWiFiDirectConnectionChanged(boolean isDeviceConnected){
+        synchronized (networkManagerListeners) {
+            for(NetworkManagerListener listener : networkManagerListeners){
+                listener.wifiDirectConnected(isDeviceConnected);
             }
         }
     }
@@ -906,6 +959,37 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * @param shareTitle Share dialog title
      */
     public abstract void shareAppSetupFile(String filePath, String shareTitle);
+
+    /**
+     * Method which is responsible for setting up state for the device to received
+     * shared content from peer device
+     * @param deviceName Peer device name.
+     * @param isReceivingContent TRUE when receiving and FALSE when sending
+     */
+    public abstract void startContentSharing(String deviceName,boolean isReceivingContent);
+
+    /**
+     * Method which is responsible to connect a device to peer device using WiFi-Direct
+     * @param deviceMacAddress Peer device MAC address
+     */
+    public abstract void connectWifiDirect(String deviceMacAddress);
+
+
+    /**
+     * Method responsible for setting current connected peer node
+     * @param node Peer network node
+     */
+    public void setP2PConnectedNode(NetworkNode node){
+        this.currentConnectedPeerNode=node;
+    }
+
+    /**
+     * Get current peer connected node which will be used to acquire shared files
+     * @return NetworkNode : Current connected network node
+     */
+    public NetworkNode getP2PConnectedNode(){
+        return currentConnectedPeerNode;
+    }
 
 
 }

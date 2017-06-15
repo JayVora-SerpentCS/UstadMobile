@@ -4,12 +4,13 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -18,13 +19,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogEntryPresenter;
+import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.view.CatalogEntryView;
+import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -32,7 +37,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 
 public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEntryView, View.OnClickListener {
@@ -46,6 +50,8 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     private NetworkManagerAndroid managerAndroid;
 
     private static Hashtable<Integer, Integer> BUTTON_ID_MAP =new Hashtable<>();
+
+    private static final int SHARE_COURSE_CONTENT_MENU_ID =1006;
 
 
     static {
@@ -136,6 +142,26 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         seeAlsoRecyclerView.setNestedScrollingEnabled(false);
     }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.NONE, SHARE_COURSE_CONTENT_MENU_ID, Menu.NONE,
+                UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.shareCourseContent));
+        return super.onCreateOptionsMenu(menu);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case SHARE_COURSE_CONTENT_MENU_ID:
+                UstadBaseController.handleClickAppMenuItem(SHARE_COURSE_CONTENT_MENU_ID, getContext());
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
     private int getButtonIdFromViewId(int viewId) {
         Enumeration<Integer> enumeration = BUTTON_ID_MAP.keys();
         Integer buttonId;
@@ -205,6 +231,8 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         });
     }
 
+
+
     @Override
     public void setSize(long downloadSize) {
 
@@ -237,6 +265,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         super.onDestroy();
         mPresenter.onDestroy();
     }
+
 
 
 }

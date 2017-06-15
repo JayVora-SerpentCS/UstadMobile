@@ -33,6 +33,7 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AboutView;
+import com.ustadmobile.core.view.CourseSharingView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
 import com.ustadmobile.core.view.UserSettingsView2;
 import com.ustadmobile.core.view.UstadView;
@@ -63,6 +64,8 @@ public abstract class UstadBaseController implements UstadController {
     public static final int CMD_HOME = 1004;
 
     public static final int CMD_SHARE_APP=1005;
+
+    public static final int CMD_SHARE_COURSE=1006;
     
     public static final int[] STANDARD_APPEMNU_CMDS = new int[]{CMD_HOME, 
         CMD_ABOUT, CMD_SETTINGS, CMD_SHARE_APP,CMD_LOGOUT};
@@ -173,7 +176,7 @@ public abstract class UstadBaseController implements UstadController {
      * Note: This method is static so it can be used without a controller object
      * (e.g. in the event a controller failed to load)
      * 
-     * @param cmdId - Command ID - CMD_ABOUT, CMD_SETTINGS or CMD_LOGOUT
+     * @param cmdId - Command ID - CMD_ABOUT, CMD_SETTINGS ,  CMD_LOGOUT or CMD_SHARE_APP
      * @param context - Platform context object
      * @return true if the command id matches something we know about and it was handled, false otherwise
      */
@@ -190,6 +193,9 @@ public abstract class UstadBaseController implements UstadController {
                 return true;
             case CMD_SHARE_APP:
                 handleClickShareAppSetupFile(context);
+                return true;
+            case CMD_SHARE_COURSE:
+                UstadMobileSystemImpl.getInstance().go(CourseSharingView.VIEW_NAME,null, context);
                 return true;
         }
         
@@ -231,6 +237,8 @@ public abstract class UstadBaseController implements UstadController {
         impl.getNetworkManager().shareAppSetupFile(impl.getAppSetupFile(context),
                 impl.getString(MessageIDConstants.shareAppDialogTitle));
     }
+
+
 
 
 

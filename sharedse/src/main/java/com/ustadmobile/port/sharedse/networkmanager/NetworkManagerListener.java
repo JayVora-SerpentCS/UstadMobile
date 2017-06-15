@@ -54,4 +54,10 @@ public interface NetworkManagerListener {
      * @param ssid The new wifi network connected to.
      */
     void wifiConnectionChanged(String ssid);
+
+    /**
+     * Indicates that normal wifi direct connection has been made
+     * @param isDeviceConnected Device connection status
+     */
+    void wifiDirectConnected(boolean isDeviceConnected);
 }
