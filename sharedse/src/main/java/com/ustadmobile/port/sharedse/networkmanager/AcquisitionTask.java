@@ -52,8 +52,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     protected NetworkManagerTaskListener listener;
 
-    public String entryTitle=null;
-
     /**
      * Flag to indicate file destination index in array.
      */
@@ -393,9 +391,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 }
             }
 
-
-
-
             /*
             if(localNetworkDownloadEnabled && entryCheckResponse != null && Calendar.getInstance().getTimeInMillis() - entryCheckResponse.getNetworkNode().getNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
                 networkManager.handleFileAcquisitionInformationAvailable(entryId, currentDownloadId,
@@ -433,7 +428,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         + fileUrl + " mode: " + mode);
                 File fileDestination = new File(getFileURIs()[FILE_DESTINATION_INDEX],
                         UMFileUtil.getFilename(fileUrl));
-                entryTitle=getFeed().entries[currentEntryIdIndex].title;
 
                 boolean downloadCompleted = false;
                 AcquisitionTaskHistoryEntry historyEntry = new AcquisitionTaskHistoryEntry(fileUrl,

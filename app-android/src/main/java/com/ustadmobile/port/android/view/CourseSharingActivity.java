@@ -21,8 +21,6 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
-import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
@@ -35,14 +33,8 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerListener;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkTask;
-import com.ustadmobile.port.sharedse.networkmanager.ResumableHttpDownload;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,16 +56,11 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
 
     private UstadMobileSystemImpl impl;
 
-
-    private static final String FILE_NAME ="shared.opds";
-
     private NetworkNode connectedNode=null;
 
     private boolean isSharingFiles=false;
 
     private boolean isSharedFileDialogShown=false;
-
-    private static final String FEED_MIME_TYPE="application/dir";
 
 
     @Override
@@ -246,45 +233,26 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
     }
 
     @Override
-    public void acquireOPDSFeedFromPeer() {
+    public void acquireOPDSFeed() {
 
-        final Thread downloadOPDSFeed=new Thread(new Runnable() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
-
-                try{
-                    String fileUrl = UMFileUtil.joinPaths(new String[]{"http://" + connectedNode.getDeviceIpAddress() + ":"
-                            + connectedNode.getPort(),"/shared/"+ FILE_NAME});
-                    Log.d(NetworkManagerAndroid.TAG,"File URL "+fileUrl);
-                    File cacheDir = managerAndroid.getContext().getCacheDir();
-                    File tempFeedFile = new File(cacheDir.getPath(), FILE_NAME);
-                    ResumableHttpDownload httpDownload=new ResumableHttpDownload(fileUrl,tempFeedFile.getAbsolutePath());
-
-                    if(httpDownload.download()){
-                        String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
-                                CatalogController.SHARED_RESOURCE, managerAndroid.getContext())[0].getDirURI();
-                        InputStream catalogIn = impl.openFileInputStream(tempFeedFile.getAbsolutePath());
-                        XmlPullParser parser = impl.newPullParser();
-                        parser.setInput(catalogIn, "UTF-8");
-                        final UstadJSOPDSFeed opdsFeed = new UstadJSOPDSFeed();
-                        opdsFeed.loadFromXpp(parser);
-                        opdsFeed.addLink(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION, FEED_MIME_TYPE, destinationDir);
-
-                        if(tempFeedFile.delete()){
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    showConfirmationDialog(opdsFeed);
-                                }
-                            });
+               String opdsSrcURL = UMFileUtil.joinPaths(new String[]{"http://" + connectedNode.getDeviceIpAddress() + ":"
+                        + connectedNode.getPort(),"/catalog/acquire.opds"});
+                File opdsDestURL = new File(managerAndroid.getContext().getCacheDir(), "acquire.opds");
+                final UstadJSOPDSFeed feed=managerAndroid.acquireOPDSFeedFromPeer(opdsSrcURL,opdsDestURL.getAbsolutePath());
+                if(feed!=null){
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showConfirmationDialog(feed);
                         }
-                    }
-                } catch (IOException | XmlPullParserException e) {
-                    e.printStackTrace();
+                    });
                 }
             }
-        });
-        downloadOPDSFeed.start();
+        }).start();
+
     }
 
     @Override
@@ -380,7 +348,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
                     managerAndroid.setP2PConnectedNode(connectedNode);
                     if(!isSharedFileDialogShown){
                         isSharedFileDialogShown=true;
-                        acquireOPDSFeedFromPeer();
+                        acquireOPDSFeed();
                     }
                 }
             }

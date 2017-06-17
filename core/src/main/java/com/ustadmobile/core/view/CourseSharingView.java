@@ -58,7 +58,7 @@ public interface CourseSharingView extends UstadView{
     /**
      * Method responsible to acquire an OPDS feed from peer device
      */
-    void acquireOPDSFeedFromPeer();
+    void acquireOPDSFeed();
 
     /**
      * Show dialog for the user to choose whether to download it or not

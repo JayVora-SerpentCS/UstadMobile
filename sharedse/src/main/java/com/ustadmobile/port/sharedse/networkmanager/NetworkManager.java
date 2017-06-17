@@ -2,6 +2,7 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
@@ -16,7 +17,12 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.impl.http.MountedZipHandler;
 import com.ustadmobile.port.sharedse.impl.http.OPDSFeedUriResponder;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -1153,6 +1159,35 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         }
 
         setSharedFeed(feed);
+    }
+
+    /**
+     * Method responsible to download an OPDS feed from peer device and create UstadJSOPDSFeed.
+     * @param feedSrc OPDS feed file source location
+     * @param feedDest OPDS feed file destination
+     * @return UstadJSOPDSFeed
+     */
+    public UstadJSOPDSFeed acquireOPDSFeedFromPeer(final String feedSrc, final String feedDest){
+        try{
+
+            if(new ResumableHttpDownload(feedSrc,feedDest).download()){
+                String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
+                        CatalogController.SHARED_RESOURCE, getContext())[0].getDirURI();
+                InputStream catalogIn = UstadMobileSystemImpl.getInstance().openFileInputStream(feedDest);
+                XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
+                parser.setInput(catalogIn, "UTF-8");
+                final UstadJSOPDSFeed opdsFeed = new UstadJSOPDSFeed();
+                opdsFeed.loadFromXpp(parser);
+                opdsFeed.addLink(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION, "application/dir", destinationDir);
+
+                if(new File(feedDest).delete()){
+                    return opdsFeed;
+                }
+            }
+        } catch (IOException | XmlPullParserException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 
