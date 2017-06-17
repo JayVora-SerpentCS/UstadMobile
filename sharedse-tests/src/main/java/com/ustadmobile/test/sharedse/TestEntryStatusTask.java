@@ -7,20 +7,16 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerListener;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkTask;
-import com.ustadmobile.port.sharedse.networkmanager.WifiDirectInfo;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.Assert;
 import org.junit.Assume;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.ustadmobile.test.core.buildconfig.TestConstants.TEST_REMOTE_SLAVE_SERVER_PORT;
 
 /**
  * Created by kileha3 on 16/05/2017.

@@ -140,7 +140,7 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
 
     private Map<String,AcquisitionTask> entryAcquisitionTaskMap=new HashMap<>();
 
-    public static final int SERVICE_PORT_NUMBER=8001;
+    public static final int SERVICE_PORT_NUMBER=8009;
 
     protected EmbeddedHTTPD httpd;
 

@@ -7,9 +7,6 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerListener;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkTask;
-import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
-import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupListener;
-import com.ustadmobile.port.sharedse.networkmanager.WifiDirectInfo;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 

@@ -68,10 +68,10 @@ public abstract class UstadBaseController implements UstadController {
     public static final int CMD_SHARE_COURSE=1006;
     
     public static final int[] STANDARD_APPEMNU_CMDS = new int[]{CMD_HOME, 
-        CMD_ABOUT, CMD_SETTINGS, CMD_SHARE_APP,CMD_LOGOUT};
+        CMD_ABOUT, CMD_SHARE_COURSE,CMD_SETTINGS, CMD_SHARE_APP,CMD_LOGOUT};
     
     public static final int[] STANDARD_APPMENU_STRIDS = new int[]{MessageIDConstants.home,
-        MessageIDConstants.about, MessageIDConstants.settings,MessageIDConstants.shareAppSetup ,MessageIDConstants.logout};
+        MessageIDConstants.about, MessageIDConstants.shareCourseContent,MessageIDConstants.settings,MessageIDConstants.shareAppSetup ,MessageIDConstants.logout};
 
 
     /**

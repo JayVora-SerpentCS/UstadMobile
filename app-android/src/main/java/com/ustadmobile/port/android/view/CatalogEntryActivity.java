@@ -102,6 +102,8 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
             feed.loadFromString(args.get(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR).toString());
 
             String entryId=feed.entries[0].id;
+            String [] entryToShare={entryId};
+            managerAndroid.setSharedFeed(entryToShare);
 
             List<String> entries=new ArrayList<>();
             entries.add(entryId);

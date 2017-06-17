@@ -258,4 +258,8 @@ public class MessageIDConstants {
     public static final int shareDialogChoiceTitle=144;
 
     public static final int shareDialogChoiceMessage=145;
+
+    public static final int receivingFileTitle=146;
+
+    public static final int courseListLabel=147;
 }

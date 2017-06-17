@@ -65,7 +65,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
      */
     private static final int FILE_DOWNLOAD_URL_INDEX=0;
 
-    private static final int DOWNLOAD_TASK_UPDATE_TIME=500;
+    private static final int DOWNLOAD_TASK_UPDATE_TIME=300;
 
     private int currentEntryIdIndex;
 
@@ -321,33 +321,37 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
      *            WiFi-Direct group creation on the host device
      * </p>
      */
-    private void acquireFile(int index){
-        if(index < feed.entries.length) {
+    private void acquireFile(int index) {
+        if (index < feed.entries.length) {
 
-            if (!isP2PConnectionEnabled) {
-                currentEntryIdIndex = index;
-                setWaitingForWifiConnection(false);
+            currentEntryIdIndex = index;
+            setWaitingForWifiConnection(false);
 
-                networkManager.getEntryAcquisitionTaskMap().put(getFeed().entries[currentEntryIdIndex].id, this);
-                if (httpDownload != null) {
-                    acquisitionStatus.setDownloadedSoFar(httpDownload.getDownloadedSoFar());
-                    acquisitionStatus.setTotalSize(httpDownload.getTotalSize());
-                }
-                acquisitionStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_RUNNING);
-                statusMap.put(getFeed().entries[currentEntryIdIndex].id, acquisitionStatus);
-                networkManager.fireAcquisitionStatusChanged(getFeed().entries[currentEntryIdIndex].id, this);
+            networkManager.getEntryAcquisitionTaskMap().put(getFeed().entries[currentEntryIdIndex].id, this);
+            if (httpDownload != null) {
+                acquisitionStatus.setDownloadedSoFar(httpDownload.getDownloadedSoFar());
+                acquisitionStatus.setTotalSize(httpDownload.getTotalSize());
+            }
+            acquisitionStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_RUNNING);
+            statusMap.put(getFeed().entries[currentEntryIdIndex].id, acquisitionStatus);
+            networkManager.fireAcquisitionStatusChanged(getFeed().entries[currentEntryIdIndex].id, this);
 
-                //TODO: Move hardcoded strings to locale constants
-                message = getFeed().entries.length > 1 ? "Downloading " + (currentEntryIdIndex + 1) + " of "
-                        + getFeed().entries.length + " files" : "Downloading file";
+            //TODO: Move hardcoded strings to locale constants
+            message = getFeed().entries.length > 1 ? "Downloading " + (currentEntryIdIndex + 1) + " of "
+                    + getFeed().entries.length + " files" : "Downloading file";
 
-                networkManager.addNotification(NOTIFICATION_TYPE_ACQUISITION,
-                        getFeed().entries[currentEntryIdIndex].title, message);
-                long currentDownloadId = new AtomicInteger().incrementAndGet();
-                String entryId = feed.entries[currentEntryIdIndex].id;
-                entryCheckResponse = networkManager.getEntryResponseWithLocalFile(entryId);
+            networkManager.addNotification(NOTIFICATION_TYPE_ACQUISITION,
+                    getFeed().entries[currentEntryIdIndex].title, message);
+            long currentDownloadId = new AtomicInteger().incrementAndGet();
+            String entryId = feed.entries[currentEntryIdIndex].id;
+            entryCheckResponse = networkManager.getEntryResponseWithLocalFile(entryId);
 
 
+            if (isP2PConnectionEnabled) {
+                String fileURI = "http://" + networkManager.getP2PConnectedNode().getDeviceIpAddress() + ":"
+                        + networkManager.getP2PConnectedNode().getPort() + "/catalog/entry/" + getFeed().entries[currentEntryIdIndex].id;
+                downloadCurrentFile(fileURI, DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
+            } else {
                 if (localNetworkDownloadEnabled && entryCheckResponse != null && Calendar.getInstance().getTimeInMillis() - entryCheckResponse.getNetworkNode().getNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT) {
                     targetNetwork = TARGET_NETWORK_NORMAL;
                     currentDownloadUrl = "http://" + entryCheckResponse.getNetworkNode().getDeviceIpAddress() + ":"
@@ -382,6 +386,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         networkManager.restoreWifi();
                     }
                 }
+            }
+
 
 
 
@@ -400,12 +406,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
             }
             */
-            } else {
-                String fileURI = "http://" + networkManager.getP2PConnectedNode().getDeviceIpAddress() + ":"
-                        + networkManager.getP2PConnectedNode().getPort() + "/catalog/entry/" + getFeed().entries[currentEntryIdIndex].id;
-                downloadCurrentFile(fileURI, DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
-            }
-        }else{
+
+        } else {
             onDone();
         }
     }

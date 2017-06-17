@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.view;
 import android.content.DialogInterface;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pInfo;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
@@ -11,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,13 +21,17 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CourseSharingView;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.netwokmanager.WifiDirectAutoAccept;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerListener;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkTask;
@@ -48,7 +52,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
 
     private DeviceAdapter deviceAdapter;
 
-    private ProgressBar progressBarWaiting;
+    private ProgressBar waitingProgressBar;
 
     private NetworkManagerAndroid managerAndroid;
 
@@ -60,17 +64,16 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
 
     private UstadMobileSystemImpl impl;
 
-    private static final String DEFAULT_SERVER_IP_ADDRESS ="192.168.49.1";
 
-    private static final String TEMP_FILE_NAME="acquire.opds";
-
-    private File tempFeedFile=null;
+    private static final String FILE_NAME ="shared.opds";
 
     private NetworkNode connectedNode=null;
 
     private boolean isSharingFiles=false;
 
     private boolean isSharedFileDialogShown=false;
+
+    private static final String FEED_MIME_TYPE="application/dir";
 
 
     @Override
@@ -86,7 +89,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
         SwitchCompat switchCompatReceive = (SwitchCompat) findViewById(R.id.receive_share_content);
         deviceRecyclerView = (RecyclerView) findViewById(R.id.all_found_nodes_to_share_course);
         fileReceivingProgressBar = (ProgressBar) findViewById(R.id.fileReceivingProgressBar);
-        progressBarWaiting= (ProgressBar) findViewById(R.id.progressBarWaiting);
+        waitingProgressBar = (ProgressBar) findViewById(R.id.progressBarWaiting);
 
 
         toolbarTitle= (TextView) findViewById(R.id.toolbarTitle);
@@ -104,6 +107,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
         deviceRecyclerView.setAdapter(deviceAdapter);
         deviceAdapter.setNodeList(new ArrayList<NetworkNode>());
         managerAndroid.addNetworkManagerListener(this);
+        managerAndroid.addAcquisitionTaskListener(this);
         switchCompatReceive.setOnCheckedChangeListener(this);
         managerAndroid.setSharingContent(true);
         switchCompatReceive.setChecked(true);
@@ -134,7 +138,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
                     }
                 }
                 int visibility=deviceList.size()>0 ? View.GONE: View.VISIBLE;
-                progressBarWaiting.setVisibility(visibility);
+                waitingProgressBar.setVisibility(visibility);
                 deviceAdapter.setNodeList(deviceList);
                 deviceAdapter.notifyDataSetChanged();
                 deviceRecyclerView.invalidate();
@@ -168,10 +172,8 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
     @Override
     public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
         int progress=(int)((status.getDownloadedSoFar()*100)/ status.getTotalSize());
-        if(status.getDownloadedSoFar()>0){
-            setFileTitle(managerAndroid.getEntryAcquisitionTaskMap().get(entryId).entryTitle);
-        }
-        setReceivingProgress(progress);
+        String entryTitle=managerAndroid.getEntryAcquisitionTaskMap().get(entryId).entryTitle;
+        setReceivingProgress(progress,entryTitle);
     }
 
     @Override
@@ -185,8 +187,13 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
     }
 
     @Override
-    public void setFileTitle(String title) {
-        receivingFileNameView.setText(title);
+    public void setFileTitle(final String title) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                receivingFileNameView.setText(title);
+            }
+        });
     }
 
 
@@ -195,22 +202,31 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
         //connected device view
         int deviceViewVisibility=connected ? View.VISIBLE: View.GONE;
         connectedDeviceView.setVisibility(deviceViewVisibility);
-
         //Discovered device list
         int deviceListVisibility=connected ? View.GONE:View.VISIBLE;
         deviceRecyclerView.setVisibility(deviceListVisibility);
+        //progressBar waiting indicator
+        waitingProgressBar.setVisibility(deviceListVisibility);
+    }
 
-
+    @Override
+    public void setReceivingViewVisibility(final boolean visible) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int visibility=visible ? View.VISIBLE:View.GONE;
+                fileReceivingProgressBar.setVisibility(visibility);
+                receivingFileNameView.setVisibility(visibility);
+            }
+        });
     }
 
 
-
     @Override
-    public void setReceivingProgress(int progress) {
-        int visibility=(progress > 0 && progress<=100)? View.VISIBLE : View.GONE;
-        fileReceivingProgressBar.setVisibility(visibility);
-        receivingFileNameView.setVisibility(visibility);
+    public void setReceivingProgress(final int progress, final String title) {
+        setFileTitle(String.format(impl.getString(MessageIDConstants.receivingFileTitle),title));
         fileReceivingProgressBar.setProgress(progress);
+        setReceivingViewVisibility(progress >= 0 && progress<=100);
     }
 
     @Override
@@ -226,51 +242,58 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
 
     @Override
     public void handleUserStartReceivingTask(UstadJSOPDSFeed feed) {
+        managerAndroid.removeNotification(NetworkManager.NOTIFICATION_TYPE_SERVER);
         managerAndroid.requestAcquisition(feed,this,false,false,true);
     }
 
     @Override
-    public void handleAcquireOPDSFeed() {
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                try{
-                    String fileUrl = "http://" + connectedNode.getDeviceIpAddress() + ":"
-                            + connectedNode.getPort()+"/catalog/"+TEMP_FILE_NAME;
-                    File cDir = getBaseContext().getCacheDir();
-                    tempFeedFile = new File(cDir.getPath(),TEMP_FILE_NAME) ;
-                    return new ResumableHttpDownload(fileUrl,tempFeedFile.getAbsolutePath()).download();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
+    public void acquireOPDSFeedFromPeer() {
 
+        final Thread downloadOPDSFeed=new Thread(new Runnable() {
             @Override
-            protected void onPostExecute(Boolean isCompleted) {
-                super.onPostExecute(isCompleted);
-                UstadJSOPDSFeed opdsFeed=null;
-                try{
-                    InputStream catalogIn = impl.openFileInputStream(tempFeedFile.getAbsolutePath());
-                    XmlPullParser parser = impl.newPullParser();
-                    parser.setInput(catalogIn, "UTF-8");
-                    opdsFeed = new UstadJSOPDSFeed();
-                    opdsFeed.loadFromXpp(parser);
+            public void run() {
 
+                try{
+                    String fileUrl = UMFileUtil.joinPaths(new String[]{"http://" + connectedNode.getDeviceIpAddress() + ":"
+                            + connectedNode.getPort(),"/shared/"+ FILE_NAME});
+                    Log.d(NetworkManagerAndroid.TAG,"File URL "+fileUrl);
+                    File cacheDir = managerAndroid.getContext().getCacheDir();
+                    File tempFeedFile = new File(cacheDir.getPath(), FILE_NAME);
+                    ResumableHttpDownload httpDownload=new ResumableHttpDownload(fileUrl,tempFeedFile.getAbsolutePath());
+
+                    if(httpDownload.download()){
+                        String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
+                                CatalogController.SHARED_RESOURCE, managerAndroid.getContext())[0].getDirURI();
+                        InputStream catalogIn = impl.openFileInputStream(tempFeedFile.getAbsolutePath());
+                        XmlPullParser parser = impl.newPullParser();
+                        parser.setInput(catalogIn, "UTF-8");
+                        final UstadJSOPDSFeed opdsFeed = new UstadJSOPDSFeed();
+                        opdsFeed.loadFromXpp(parser);
+                        opdsFeed.addLink(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION, FEED_MIME_TYPE, destinationDir);
+
+                        if(tempFeedFile.delete()){
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    showConfirmationDialog(opdsFeed);
+                                }
+                            });
+                        }
+                    }
                 } catch (IOException | XmlPullParserException e) {
                     e.printStackTrace();
                 }
-                if(isCompleted){
-                    showConfirmationDialog(opdsFeed);
-                }
             }
-        }.execute();
+        });
+        downloadOPDSFeed.start();
     }
 
     @Override
     public void showConfirmationDialog(final UstadJSOPDSFeed opdsFeed) {
         String filesList="";
-        String message=opdsFeed.entries.length>0? opdsFeed.entries.length+" courses":opdsFeed.entries.length+" course";
+        String message=opdsFeed.entries.length >1 ?
+                opdsFeed.entries.length+String.format(impl.getString(MessageIDConstants.courseListLabel),"s")
+                :opdsFeed.entries.length+String.format(impl.getString(MessageIDConstants.courseListLabel),"");
         if(opdsFeed.entries.length>1){
             for(int position=0;position<opdsFeed.entries.length;position++){
 
@@ -300,6 +323,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
         builder.setPositiveButton(impl.getString(MessageIDConstants.ok), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                waitingProgressBar.setVisibility(View.GONE);
                 handleUserStartReceivingTask(opdsFeed);
             }
         });
@@ -314,7 +338,8 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
 
     @Override
     public void entryStatusCheckCompleted(NetworkTask task) {
-
+        setReceivingViewVisibility(false);
+        handleUserCancelDownloadTask();
     }
 
     @Override
@@ -339,23 +364,23 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
         if(isDeviceConnected ){
             WifiP2pInfo wifiP2pInfo=managerAndroid.getWifiDirectHandler().getWifiP2pInfo();
             if(wifiP2pInfo.isGroupOwner && isSharingFiles){
-                for(WifiP2pDevice p2pDevice: managerAndroid.getWifiDirectHandler().getWifiP2pGroup().getClientList()){
-                    deviceName=p2pDevice.deviceName;
-                    deviceAddress=impl.getString(MessageIDConstants.deviceAddressLabel)+" "+p2pDevice.deviceAddress;
-                }
+                Log.d(NetworkManagerAndroid.TAG,"My IP address "+wifiP2pInfo.groupOwnerAddress+" on port "+managerAndroid.getHttpListeningPort());
+                deviceName=connectedNode.getDeviceName();
+                deviceAddress=impl.getString(MessageIDConstants.deviceAddressLabel)+" "+connectedNode.getDeviceWifiDirectMacAddress();
 
             }else{
                 WifiP2pDevice groupOwner=managerAndroid.getWifiDirectHandler().getWifiP2pGroup().getOwner();
                 if(groupOwner!=null){
                     deviceName=groupOwner.deviceName;
                     deviceAddress=impl.getString(MessageIDConstants.deviceAddressLabel)+" "+groupOwner.deviceAddress;
-                    connectedNode=new NetworkNode(groupOwner.deviceAddress,DEFAULT_SERVER_IP_ADDRESS);
+                    String ipAddress=String.valueOf(managerAndroid.getWifiDirectHandler().getWifiP2pInfo().groupOwnerAddress).replace("/","");
+                    connectedNode=new NetworkNode(groupOwner.deviceAddress,ipAddress);
                     connectedNode.setPort(managerAndroid.getHttpListeningPort());
                     connectedNode.setDeviceName(deviceName);
                     managerAndroid.setP2PConnectedNode(connectedNode);
                     if(!isSharedFileDialogShown){
                         isSharedFileDialogShown=true;
-                        handleAcquireOPDSFeed();
+                        acquireOPDSFeedFromPeer();
                     }
                 }
             }
@@ -404,6 +429,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
             holder.deviceHolder.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    connectedNode=nodeList.get(holder.getAdapterPosition());
                     managerAndroid.setP2PConnectedNode(nodeList.get(holder.getAdapterPosition()));
                     managerAndroid.connectWifiDirect(nodeList.get(holder.getAdapterPosition()).getDeviceWifiDirectMacAddress());
                 }
