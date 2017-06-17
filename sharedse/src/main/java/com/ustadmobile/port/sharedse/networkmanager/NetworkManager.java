@@ -349,6 +349,24 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * @param queueType Queue type, whether is queue of Acquisition task or EntryStatus task
      */
     public synchronized void checkTaskQueue(int queueType){
+        if(queueType == QUEUE_ENTRY_ACQUISITION && tasksQueues[queueType].isEmpty()) {
+            switch(actionRequiredAfterGroupConnection) {
+                case AFTER_GROUP_CONNECTION_DISCONNECT:
+                    UstadMobileSystemImpl.l(UMLog.INFO, 326,
+                        "NetworkManager:checkTaskQueue: all tasks complete - WiFi to be disconnected after group connection");
+                    actionRequiredAfterGroupConnection = AFTER_GROUP_CONNECTION_DO_NOTHING;
+                    disconnectWifi();
+                    break;
+
+                case AFTER_GROUP_CONNECTION_RESTORE:
+                    UstadMobileSystemImpl.l(UMLog.INFO, 327,
+                        "NetworkManager:checkTaskQueue: all tasks complete - WiFi to be restored to 'normal' after group connection");
+                    actionRequiredAfterGroupConnection = AFTER_GROUP_CONNECTION_DO_NOTHING;
+                    restoreWifi();
+                    break;
+            }
+        }
+
         if(!tasksQueues[queueType].isEmpty() && currentTasks[queueType] == null) {
             currentTasks[queueType] = tasksQueues[queueType].remove(0);
             currentTasks[queueType].setNetworkManager(this);
@@ -356,19 +374,7 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
             currentTasks[queueType].start();
         }
 
-        if(queueType == QUEUE_ENTRY_ACQUISITION && tasksQueues[queueType].isEmpty()) {
-            switch(actionRequiredAfterGroupConnection) {
-                case AFTER_GROUP_CONNECTION_DISCONNECT:
-                    actionRequiredAfterGroupConnection = AFTER_GROUP_CONNECTION_DO_NOTHING;
-                    disconnectWifi();
-                    break;
 
-                case AFTER_GROUP_CONNECTION_RESTORE:
-                    actionRequiredAfterGroupConnection = AFTER_GROUP_CONNECTION_DO_NOTHING;
-                    restoreWifi();
-                    break;
-            }
-        }
     }
 
     /**
@@ -686,7 +692,7 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     protected void fireEntryStatusCheckCompleted(NetworkTask task){
         synchronized (networkManagerListeners) {
             for(NetworkManagerListener listener : networkManagerListeners){
-                listener.entryStatusCheckCompleted(task);
+                listener.networkTaskCompleted(task);
             }
         }
     }
@@ -748,7 +754,6 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     public void handleTaskCompleted(NetworkTask task) {
         if(task == currentTasks[task.getTaskType()]) {
             currentTasks[task.getTaskType()] = null;
-            tasksQueues[task.getTaskType()].remove(task);
             checkTaskQueue(task.getTaskType());
         }
 
@@ -953,10 +958,12 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * Fire acquisition status change to all listening parts of the app
      * @param entryId
      */
-    protected void fireAcquisitionStatusChanged(String entryId, AcquisitionTask task){
+    protected void fireAcquisitionStatusChanged(String entryId, AcquisitionTask.Status status){
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 645, "fireAcquisitionStatusChanged: " + entryId +
+                " : " + status.getStatus());
         synchronized (acquisitionListeners) {
             for(AcquisitionListener listener : acquisitionListeners){
-                listener.acquisitionStatusChanged(entryId, task.getStatusByEntryId(entryId));
+                listener.acquisitionStatusChanged(entryId, status);
             }
         }
     }
@@ -965,10 +972,26 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * Find the acquisition task for the given entry id
      *
      * @param entryId Entry ID to find
-     * @return The task carrying out acquisition of this entry, or null if it's not being acquired
+     *
+     * @return The task carrying out acquisition of this entry, or null if it's not being acquired by any known task
      */
     public AcquisitionTask getAcquisitionTaskByEntryId(String entryId) {
-        return getEntryAcquisitionTaskMap().get(entryId);
+        synchronized (tasksQueues[QUEUE_ENTRY_ACQUISITION]) {
+            AcquisitionTask acquisitionTask;
+            if(currentTasks[QUEUE_ENTRY_ACQUISITION] != null) {
+                acquisitionTask = (AcquisitionTask)currentTasks[QUEUE_ENTRY_ACQUISITION];
+                if(acquisitionTask.taskIncludesEntry(entryId))
+                    return acquisitionTask;
+            }
+
+            for(int i = 0; i < tasksQueues[QUEUE_ENTRY_ACQUISITION].size(); i++) {
+                acquisitionTask = (AcquisitionTask)tasksQueues[QUEUE_ENTRY_ACQUISITION].get(i);
+                if(acquisitionTask.taskIncludesEntry(entryId))
+                    return acquisitionTask;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -994,12 +1017,6 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * @return Wifi direct group status as per the constants
      */
     public abstract int getWifiDirectGroupStatus();
-
-    /**
-     * Reconnect the previous connected wifi after Wifi-Direct
-     * acquisitionTask completion.
-     */
-    public abstract void reconnectPreviousNetwork();
 
     /**
      * Clean up the network manager for shutdown

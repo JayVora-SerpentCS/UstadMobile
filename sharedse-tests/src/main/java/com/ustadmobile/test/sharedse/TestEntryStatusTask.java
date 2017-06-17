@@ -56,7 +56,7 @@ public class TestEntryStatusTask{
             }
 
             @Override
-            public void entryStatusCheckCompleted(NetworkTask task) {
+            public void networkTaskCompleted(NetworkTask task) {
                 //TODO; Notify here
                 synchronized (statusRequestLock){
                     statusRequestLock.notify();
@@ -131,6 +131,7 @@ public class TestEntryStatusTask{
         String disableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=false";
         result = UstadMobileSystemImpl.getInstance().makeRequest(disableNodeUrl, null, null);
         Assert.assertEquals("Supernode mode reported as disabled", 200, result.getStatus());
+        manager.removeNetworkManagerListener(responseListener);
     }
 
 

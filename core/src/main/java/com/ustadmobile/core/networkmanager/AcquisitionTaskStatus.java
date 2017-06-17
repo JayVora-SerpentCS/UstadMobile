@@ -26,4 +26,10 @@ public interface AcquisitionTaskStatus {
      * @return the status of the acquisition as per UstadMobileSystemImpl.DLSTATUS_ flags
      */
     int getStatus();
+
+    /**
+     * Get current entry title
+     * @return String : Entry title
+     */
+    String getEntryTitle();
 }

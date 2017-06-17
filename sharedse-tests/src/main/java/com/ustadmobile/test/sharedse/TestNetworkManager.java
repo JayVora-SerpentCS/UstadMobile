@@ -46,7 +46,7 @@ public class TestNetworkManager {
             }
 
             @Override
-            public void entryStatusCheckCompleted(NetworkTask task) {
+            public void networkTaskCompleted(NetworkTask task) {
 
             }
 
@@ -110,6 +110,7 @@ public class TestNetworkManager {
 
         Assert.assertNotNull("Remote test slave node discovered",
                 manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE));
+        manager.removeNetworkManagerListener(responseListener);
 
     }
 
@@ -145,7 +146,7 @@ public class TestNetworkManager {
             }
 
             @Override
-            public void entryStatusCheckCompleted(NetworkTask task) {
+            public void networkTaskCompleted(NetworkTask task) {
 
             }
 
@@ -205,7 +206,7 @@ public class TestNetworkManager {
         boolean isWithinDiscoveryTimeRange=
                 (Calendar.getInstance().getTimeInMillis()-node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT;
         Assert.assertThat("Was node discovered withing time range",isWithinDiscoveryTimeRange,is(true));
-
+        manager.removeNetworkManagerListener(responseListener);
     }
 
 

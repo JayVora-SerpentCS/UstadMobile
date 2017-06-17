@@ -172,8 +172,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
     @Override
     public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
         int progress=(int)((status.getDownloadedSoFar()*100)/ status.getTotalSize());
-        String entryTitle=managerAndroid.getEntryAcquisitionTaskMap().get(entryId).entryTitle;
-        setReceivingProgress(progress,entryTitle);
+        setReceivingProgress(progress,status.getEntryTitle());
     }
 
     @Override
@@ -337,10 +336,11 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
     }
 
     @Override
-    public void entryStatusCheckCompleted(NetworkTask task) {
+    public void networkTaskCompleted(NetworkTask task) {
         setReceivingViewVisibility(false);
         handleUserCancelDownloadTask();
     }
+
 
     @Override
     public void networkNodeDiscovered(NetworkNode node) {
