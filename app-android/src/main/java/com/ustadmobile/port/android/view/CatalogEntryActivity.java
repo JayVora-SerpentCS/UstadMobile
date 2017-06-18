@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
@@ -260,6 +261,30 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     public void setProgressVisible(boolean visible) {
         findViewById(R.id.activity_catalog_entry_download_status_layout).setVisibility(
                 visible? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void setLocallyAvailableStatus(int status) {
+        ImageView statusIconView = (ImageView) findViewById(R.id.activity_catalog_entry_local_availability_icon);
+        TextView statusTextView = (TextView)findViewById(R.id.activity_catalog_entry_local_availability_text);
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        switch(status) {
+            case CatalogEntryView.LOCAL_STATUS_IN_PROGRESS:
+                statusIconView.setVisibility(View.INVISIBLE);
+                break;
+            case CatalogEntryView.LOCAL_STATUS_AVAILABLE:
+                statusIconView.setImageDrawable(ContextCompat.getDrawable(this,
+                        R.drawable.ic_done_black_16dp));
+                statusIconView.setVisibility(View.VISIBLE);
+                statusTextView.setText(impl.getString(MessageIDConstants.fileAvailableLocally));
+                break;
+            case CatalogEntryView.LOCAL_STATUS_NOT_AVAILABLE:
+                statusIconView.setImageDrawable(ContextCompat.getDrawable(this,
+                        R.drawable.ic_cloud_download_black_24dp));
+                statusTextView.setText(impl.getString(MessageIDConstants.fileUnAvailableLocally));
+                statusIconView.setVisibility(View.VISIBLE);
+                break;
+        }
     }
 
     @Override

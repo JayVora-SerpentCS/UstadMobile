@@ -6,6 +6,11 @@ import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
+import com.ustadmobile.core.networkmanager.EntryCheckResponse;
+import com.ustadmobile.core.networkmanager.NetworkManagerListener;
+import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
+import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
@@ -24,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +49,7 @@ import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_N
  *
  * @author kileha3
  *
- * @see com.ustadmobile.port.sharedse.networkmanager.NetworkManagerTaskListener
+ * @see NetworkManagerTaskListener
  * @see com.ustadmobile.core.networkmanager.NetworkManagerCore
  */
 
@@ -271,14 +277,19 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      *
      * @return
      */
-    public List<String> requestFileStatus(List<String> entryIds,Object mContext,List<NetworkNode> nodeList, boolean useBluetooth, boolean useHttp){
+    public long requestFileStatus(List<String> entryIds,Object mContext,List<NetworkNode> nodeList, boolean useBluetooth, boolean useHttp){
         EntryStatusTask task = new EntryStatusTask(entryIds,nodeList,this);
         task.setTaskType(QUEUE_ENTRY_STATUS);
         task.setUseBluetooth(useBluetooth);
         task.setUseHttp(useHttp);
         queueTask(task);
-        return entryIds;
+        return task.getTaskId();
     }
+
+    public long requestFileStatus(String[] entryIds, boolean useBluetooth, boolean useHttp) {
+        return requestFileStatus(Arrays.asList(entryIds), getContext(), getKnownNodes(), useBluetooth, useHttp);
+    }
+
 
     /**
      * Request the status of given entryIds to see if they are available locally or not. By default
@@ -290,7 +301,7 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      *
      * @return
      */
-    public List<String> requestFileStatus(List<String> entryIds,Object mContext,List<NetworkNode> nodeList) {
+    public long requestFileStatus(List<String> entryIds,Object mContext,List<NetworkNode> nodeList) {
         return requestFileStatus(entryIds, mContext, nodeList, true, true);
     }
 

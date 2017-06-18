@@ -245,21 +245,23 @@ public class MessageIDConstants {
 
     public static final int shareAppDialogTitle=138;
 
-    public static final int shareCourseContent=139;
+    public static final int internet_download = 139;
 
-    public static final int receiveSharedCourse=140;
+    public static final int shareCourseContent=140;
 
-    public static final int chooseDeviceToShareWith=141;
+    public static final int receiveSharedCourse=141;
 
-    public static final int deviceConnectedTo=142;
+    public static final int chooseDeviceToShareWith=142;
 
-    public static final int deviceAddressLabel=143;
+    public static final int deviceConnectedTo=143;
 
-    public static final int shareDialogChoiceTitle=144;
+    public static final int deviceAddressLabel=144;
 
-    public static final int shareDialogChoiceMessage=145;
+    public static final int shareDialogChoiceTitle=145;
 
-    public static final int receivingFileTitle=146;
+    public static final int shareDialogChoiceMessage=146;
 
-    public static final int courseListLabel=147;
+    public static final int receivingFileTitle=147;
+
+    public static final int courseListLabel=148;
 }

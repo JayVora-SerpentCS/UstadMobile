@@ -2,6 +2,7 @@ package com.ustadmobile.test.sharedse.impl;
 
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
@@ -225,6 +226,9 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
 
     @Override
     public String getExtensionFromMimeType(String mimeType) {
+        if(mimeType.equals(UstadJSOPDSFeed.TYPE_EPUBCONTAINER))
+            return "epub";
+
         return null;
     }
 
