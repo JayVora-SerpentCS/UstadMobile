@@ -2,6 +2,7 @@ package com.ustadmobile.test.sharedse.http;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
+import com.ustadmobile.port.sharedse.networkmanager.ResumableHttpDownload;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupListener;
 
@@ -25,6 +26,10 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
 
     public static final String CMD_CREATEGROUP = "CREATEGROUP";
 
+    public static final String CMD_RECEIVE_FILE = "RECEIVEFILE";
+
+    public static final String CMD_ACQUIRE_FILE = "ACQUIREFILE";
+
     public static final int GROUP_CREATION_TIMEOUT = 60*1000;
 
 
@@ -44,7 +49,19 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
                 boolean enabled = Boolean.parseBoolean(decodedParams.get("enabled").get(0));
                 networkManager.setSuperNodeEnabled(networkManager.getContext(), enabled);
                 return newFixedLengthResponse("OK");
-            }else if(CMD_CREATEGROUP.equals(command)) {
+            }else if(CMD_RECEIVE_FILE.equals(command)){
+                boolean enabled = Boolean.parseBoolean(decodedParams.get("enabled").get(0));
+                networkManager.setSuperNodeEnabled(this,enabled);
+                return newFixedLengthResponse("OK");
+            }else if(CMD_ACQUIRE_FILE.equals(command)){
+                String srcUrl=decodedParams.get("src").get(0);
+                String destUrl=decodedParams.get("dest").get(0);
+                if(new ResumableHttpDownload(srcUrl,destUrl).download()){
+                    return newFixedLengthResponse("OK");
+                }else{
+                    return newFixedLengthResponse("401");
+                }
+            } else if(CMD_CREATEGROUP.equals(command)) {
                 int groupStatus = networkManager.getWifiDirectGroupStatus();
                 final Object groupLock = new Object();
                 WiFiDirectGroup group = null;
@@ -85,12 +102,12 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
                                 jsonResponse.toString());
                     }else {
                         response = newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain",
-                                "wifi direct gruop not created");
+                                "wifi direct group not created");
                     }
                 }catch(Exception e) {
                     e.printStackTrace();
                     response = newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain",
-                            "wifi direct gruop not created: exception" + e.toString());
+                            "wifi direct group not created: exception" + e.toString());
                 }finally {
                     networkManager.removeWifiDirectGroupListener(groupListener);
                 }

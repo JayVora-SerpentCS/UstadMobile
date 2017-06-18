@@ -13,6 +13,7 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
+import com.ustadmobile.port.android.netwokmanager.WifiDirectAutoAccept;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
@@ -27,6 +28,7 @@ public class RemoteTestSlaveServerActivity extends UstadBaseActivity implements 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_remote_test_slave_server_acitivity);
+        new WifiDirectAutoAccept(this).intercept(true);
         try {
             CatalogController.makeDeviceFeed(
                     UstadMobileSystemImpl.getInstance().getStorageDirs(CatalogController.SHARED_RESOURCE, this),

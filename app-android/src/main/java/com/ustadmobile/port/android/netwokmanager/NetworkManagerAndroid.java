@@ -334,7 +334,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         isSharingContent =true;
         if(wifiDirectHandler!=null && !isReceivingContent){
             dnsTextRecords=getDnsTextRecords();
-            dnsTextRecords.remove(SD_TXT_KEY_BT_MAC);
+            dnsTextRecords.remove(SD_TXT_KEY_IP_ADDR);
             dnsTextRecords.remove(SD_TXT_KEY_PORT);
             dnsTextRecords.remove(SERVICE_DEVICE_AVAILABILITY);
             dnsTextRecords.put(SD_TXT_KEY_DV_NAME,deviceName);

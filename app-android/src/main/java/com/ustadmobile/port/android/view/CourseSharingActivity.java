@@ -247,7 +247,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
                 @Override
                 public void run() {
                     String opdsSrcURL = UMFileUtil.joinPaths(new String[]{"http://" + connectedNode.getDeviceIpAddress() + ":"
-                            + connectedNode.getPort(),"/shared/shared.opds"});
+                            + connectedNode.getPort(),"/catalog/acquire.opds"});
                     File opdsDestURL = new File(managerAndroid.getContext().getCacheDir(), "acquire.opds");
                     Log.d(NetworkManagerAndroid.TAG,"OPDS source "+opdsSrcURL);
                     final UstadJSOPDSFeed feed=managerAndroid.acquireOPDSFeedFromPeer(opdsSrcURL,opdsDestURL.getAbsolutePath());
