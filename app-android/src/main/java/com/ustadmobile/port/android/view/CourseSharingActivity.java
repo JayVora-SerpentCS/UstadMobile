@@ -60,7 +60,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
 
     private NetworkNode connectedNode =null;
 
-    private boolean isSharingFiles=false;
+    private boolean isReceiverDevice =false;
 
     private boolean isSharedFileDialogShown=false;
 
@@ -100,7 +100,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
         managerAndroid.addNetworkManagerListener(this);
         managerAndroid.addAcquisitionTaskListener(this);
         switchCompatReceive.setOnCheckedChangeListener(this);
-        managerAndroid.setSharingContent(true);
+        managerAndroid.setContentSharingEnabled(true);
         switchCompatReceive.setChecked(true);
         new WifiDirectAutoAccept(this).intercept(true);
 
@@ -110,7 +110,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
     @Override
     public void onDestroy() {
         if(managerAndroid!=null){
-            managerAndroid.setSharingContent(false);
+            managerAndroid.setContentSharingEnabled(false);
             if(managerAndroid.isSuperNodeEnabled()){
                managerAndroid.setSuperNodeEnabled(this,true);
             }
@@ -139,28 +139,21 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
     }
 
     @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        handleSwitchSelectionChange(isChecked);
-    }
-
-
-
-    private void handleSwitchSelectionChange(boolean isReceivingContent){
-
-        if(isReceivingContent){
+    public void onCheckedChanged(CompoundButton buttonView, boolean isReceiverDevice) {
+        if(!isReceiverDevice){
             refreshDeviceList();
         }
-        managerAndroid.startContentSharing(impl.getDeviceName(this),isReceivingContent);
-        this.isSharingFiles=isReceivingContent;
-        String title=isReceivingContent ? impl.getString(MessageIDConstants.chooseDeviceToShareWith):
-                impl.getString(MessageIDConstants.receiveSharedCourse);
-        int deviceListVisibility=isReceivingContent ? View.VISIBLE: View.GONE;
+        managerAndroid.startContentSharing(impl.getDeviceName(this),isReceiverDevice);
+        this.isReceiverDevice =isReceiverDevice;
+        String title=isReceiverDevice ? impl.getString(MessageIDConstants.receiveSharedCourse)
+                :impl.getString(MessageIDConstants.chooseDeviceToShareWith);
+        int deviceListVisibility=isReceiverDevice ? View.GONE: View.VISIBLE;
         deviceRecyclerView.setVisibility(deviceListVisibility);
-        managerAndroid.setSuperNodeEnabled(this,!isReceivingContent);
-        managerAndroid.setSharingContent(true);
+        managerAndroid.setContentSharingEnabled(true);
         setToolbarTitle(title);
         handleUserCancelDownloadTask();
     }
+
 
     @Override
     public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
@@ -343,7 +336,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
         String deviceName=null,deviceAddress=null;
         if(isDeviceConnected){
             WifiP2pInfo wifiP2pInfo=managerAndroid.getWifiDirectHandler().getWifiP2pInfo();
-            if(wifiP2pInfo.isGroupOwner && isSharingFiles){
+            if(wifiP2pInfo.isGroupOwner && !isReceiverDevice){
                 Log.d(NetworkManagerAndroid.TAG,"My IP address "+
                         wifiP2pInfo.groupOwnerAddress+" on port "+managerAndroid.getHttpListeningPort());
                 //get all connected clients devices
@@ -389,7 +382,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
                         : impl.getString(MessageIDConstants.chooseDeviceToShareWith));
         setToolbarTitle(title);
         waitingProgressBar.setVisibility(isDeviceConnected ? View.GONE : View.VISIBLE);
-        setViewsVisibility(isDeviceConnected && !isSharingFiles);
+        setViewsVisibility(isDeviceConnected && isReceiverDevice);
     }
 
     @Override

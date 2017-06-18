@@ -51,7 +51,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -135,7 +134,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private HashMap<String,String> dnsTextRecords=null;
 
-    private boolean isSharingContent =false;
+    private boolean isContentSharingEnabled =false;
     /**
      * Assets are served over http that are used to interact with the content (e.g. to inject a
      * javascript into the content that handles autoplay).
@@ -270,9 +269,9 @@ public class NetworkManagerAndroid extends NetworkManager{
     @Override
     public void setSuperNodeEnabled(Object context, boolean enabled) {
         if(isBluetoothEnabled() && isWiFiEnabled()){
-            if(enabled && nodeStatus != NODE_STATUS_SUPERNODE_RUNNING){
+            if(enabled && ((nodeStatus != NODE_STATUS_SUPERNODE_RUNNING) || isContentSharingEnabled)){
                 startSuperNode();
-            }else if(!enabled && nodeStatus != NODE_STATUS_CLIENT_RUNNING){
+            }else if(!enabled && ((nodeStatus != NODE_STATUS_CLIENT_RUNNING) || isContentSharingEnabled)){
                 stopSuperNode();
             }
         }else{
@@ -289,14 +288,13 @@ public class NetworkManagerAndroid extends NetworkManager{
            if(nsdHelperAndroid.isDiscoveringNetworkService()){
                nsdHelperAndroid.stopNSDiscovery();
            }
-           if(!isSharingContent){
+           if(!isContentSharingEnabled){
                dnsTextRecords=getDnsTextRecords();
                nsdHelperAndroid.registerNSDService();
            }
-           Log.d("DNS",dnsTextRecords.toString());
            wifiDirectHandler.addLocalService(NETWORK_SERVICE_NAME,dnsTextRecords);
            bluetoothServerAndroid.start();
-           if(isSharingContent){
+           if(isContentSharingEnabled){
                addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, receivingCourseNotificationMessage);
            }else{
                addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, serverNotificationMessage);
@@ -317,7 +315,7 @@ public class NetworkManagerAndroid extends NetworkManager{
             wifiDirectHandler.removeService();
             wifiDirectHandler.continuouslyDiscoverServices();
 
-            if(!isSharingContent){
+            if(!isContentSharingEnabled){
                 nsdHelperAndroid.startNSDiscovery();
                 bluetoothServerAndroid.stop();
             }else {
@@ -329,18 +327,17 @@ public class NetworkManagerAndroid extends NetworkManager{
     }
 
     @Override
-    public void startContentSharing(String deviceName,boolean isReceivingContent) {
-        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
-        isSharingContent =true;
-        if(wifiDirectHandler!=null && !isReceivingContent){
+    public void startContentSharing(String deviceName,boolean isReceiverDevice) {
+        isContentSharingEnabled =true;
+        if(networkService.getWifiDirectHandlerAPI()!=null && isReceiverDevice){
             dnsTextRecords=getDnsTextRecords();
             dnsTextRecords.remove(SD_TXT_KEY_IP_ADDR);
             dnsTextRecords.remove(SD_TXT_KEY_PORT);
             dnsTextRecords.remove(SERVICE_DEVICE_AVAILABILITY);
             dnsTextRecords.put(SD_TXT_KEY_DV_NAME,deviceName);
-            setSuperNodeEnabled(getContext(),isReceivingContent);
 
         }
+        setSuperNodeEnabled(getContext(),isReceiverDevice);
 
     }
 
@@ -814,9 +811,9 @@ public class NetworkManagerAndroid extends NetworkManager{
     /**
      * Method which is responsible for setting up status when content
      * sharing between peer device is started
-     * @param sharingContent TRUE when sharing content otherwise FALSE
+     * @param contentSharingEnabled TRUE when sharing content otherwise FALSE
      */
-    public void setSharingContent(boolean sharingContent) {
-        isSharingContent = sharingContent;
+    public void setContentSharingEnabled(boolean contentSharingEnabled) {
+        isContentSharingEnabled = contentSharingEnabled;
     }
 }
