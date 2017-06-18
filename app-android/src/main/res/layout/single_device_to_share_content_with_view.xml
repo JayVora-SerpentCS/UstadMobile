@@ -7,6 +7,7 @@
     android:foreground="?android:attr/selectableItemBackground"
     android:orientation="vertical"
     android:layout_width="match_parent"
+    android:background="@color/icons"
     android:layout_height="wrap_content">
     <LinearLayout
         android:orientation="vertical"
@@ -43,6 +44,13 @@
             android:layout_height="0.9dp"/>
 
     </LinearLayout>
+
+    <FrameLayout
+        android:layout_margin="@dimen/dimen_16dp"
+        android:layout_gravity="center_vertical|end"
+        android:id="@+id/connection_indicator"
+        android:layout_width="@dimen/dimen_16dp"
+        android:layout_height="@dimen/dimen_16dp"/>
 
 
 </FrameLayout>

@@ -211,12 +211,16 @@ public class NSDHelperAndroid {
      * After calling it, no other peer device services will be discovered
      */
     public synchronized void stopNSDiscovery(){
-       if(mNsdManager != null && networkDiscoveryListener!=null){
-           mNsdManager.stopServiceDiscovery(networkDiscoveryListener);
-           networkDiscoveryListener=null;
-           nsdServiceInfo=null;
-           isDiscoveringNetworkService=false;
-       }
+      try{
+          if(mNsdManager != null && networkDiscoveryListener!=null){
+              mNsdManager.stopServiceDiscovery(networkDiscoveryListener);
+              networkDiscoveryListener=null;
+              nsdServiceInfo=null;
+              isDiscoveringNetworkService=false;
+          }
+      }catch (IllegalStateException e){
+          e.printStackTrace();
+      }
     }
 
     /**

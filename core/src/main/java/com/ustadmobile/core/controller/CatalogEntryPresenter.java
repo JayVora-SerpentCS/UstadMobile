@@ -264,6 +264,11 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
     }
 
     @Override
+    public void wifiDirectConnected(boolean isDeviceConnected) {
+
+    }
+
+    @Override
     public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
 
     }

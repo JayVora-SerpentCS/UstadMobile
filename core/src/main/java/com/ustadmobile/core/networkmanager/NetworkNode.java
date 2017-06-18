@@ -17,6 +17,7 @@ public class NetworkNode {
     private long networkServiceLastUpdated;
     private int port;
     private String deviceName;
+    private int status;
 
     /**
      * Creating a NetworkNode
@@ -133,6 +134,22 @@ public class NetworkNode {
      */
     public String getDeviceName() {
         return deviceName;
+    }
+
+    /**
+     * Method which is responsible to get NetworkNode status (BUSY, CONNECTED or AVAILABLE)
+     * @return int: device status
+     */
+    public int getStatus() {
+        return status;
+    }
+
+    /**
+     * Method which is responsible to set NetworkNode status
+     * @param status device status
+     */
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     /**

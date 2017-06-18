@@ -247,7 +247,6 @@ public class NetworkManagerAndroid extends NetworkManager{
                     break;
 
                 case WifiDirectHandler.Action.DEVICE_CHANGED:
-                    WifiP2pInfo wifiP2pInfo=networkService.getWifiDirectHandlerAPI().getWifiP2pInfo();
                     if(networkService.getWifiDirectHandlerAPI().getWifiP2pInfo()!=null){
                         boolean isDeviceConnected=networkService.getWifiDirectHandlerAPI().getThisDevice().status==WifiP2pDevice.CONNECTED;
                         handleWifiDirectConnectionChanged(isDeviceConnected);
@@ -337,7 +336,7 @@ public class NetworkManagerAndroid extends NetworkManager{
             dnsTextRecords=getDnsTextRecords();
             dnsTextRecords.remove(SD_TXT_KEY_BT_MAC);
             dnsTextRecords.remove(SD_TXT_KEY_PORT);
-            dnsTextRecords.remove(SD_TXT_KEY_IP_ADDR);
+            dnsTextRecords.remove(SERVICE_DEVICE_AVAILABILITY);
             dnsTextRecords.put(SD_TXT_KEY_DV_NAME,deviceName);
             setSuperNodeEnabled(getContext(),isReceivingContent);
 
