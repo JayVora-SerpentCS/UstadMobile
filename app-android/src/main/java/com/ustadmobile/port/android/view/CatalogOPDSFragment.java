@@ -46,6 +46,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -62,6 +63,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.ControllerReadyListener;
+import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -70,12 +72,16 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
+
+import static com.ustadmobile.core.controller.UstadBaseController.CMD_SHARE_COURSE;
+import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.PREF_KEY_RECEIVE_CONTENT;
 
 
 /**
@@ -113,6 +119,9 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     private static final int MENUCMDID_DELETE = 1201;
 
+    private static final int MENUCMDID_SHARE = 1202;
+
+
     private RecyclerView mRecyclerView;
 
     private RecyclerView.Adapter mRecyclerAdapter;
@@ -120,6 +129,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
     private boolean isRequesting=false;
+
 
 
     /**
@@ -154,7 +164,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         mSelectedEntries = new UstadJSOPDSEntry[0];
         setHasOptionsMenu(true);
 
-        idToCardMap = new WeakHashMap<String, OPDSEntryCard>();
+        idToCardMap = new WeakHashMap<>();
 
         mFetchFlags = getArguments().getInt(CatalogController.KEY_FLAGS,
                 CatalogController.CACHE_ENABLED);
@@ -281,9 +291,14 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         if(mDeleteOptionAvailable && mSelectedEntries.length > 0) {
-            MenuItem item = menu.add(Menu.NONE, MENUCMDID_DELETE, 1, "");
-            item.setIcon(R.drawable.ic_delete_white_24dp);
-            item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+            MenuItem deleteMenu = menu.add(Menu.NONE, MENUCMDID_DELETE, 1, "");
+            deleteMenu.setIcon(R.drawable.ic_delete_white_24dp);
+            deleteMenu.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+
+            MenuItem shareMenu = menu.add(Menu.NONE, MENUCMDID_SHARE, 2, "");
+            shareMenu.setIcon(R.drawable.ic_share_white_24dp);
+            shareMenu.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+
         }
 
         super.onCreateOptionsMenu(menu, inflater);
@@ -296,6 +311,17 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             case MENUCMDID_ADD:
                 mCatalogController.handleClickAdd();
                 return true;
+
+            case MENUCMDID_SHARE:
+                String [] entries=new String[mSelectedEntries.length];
+                for(int position=0;position<mSelectedEntries.length;position++){
+                    entries[position]=mSelectedEntries[position].id;
+                }
+                ((NetworkManagerAndroid)UstadMobileSystemImpl.getInstance().getNetworkManager()).setSharedFeed(entries);
+                UstadMobileSystemImpl.getInstance().setAppPref(PREF_KEY_RECEIVE_CONTENT,"false",getActivity());
+                UstadBaseController.handleClickAppMenuItem(CMD_SHARE_COURSE, getContext());
+                return true;
+
             case R.id.action_opds_acquire:
                 if(getSelectedEntries().length > 0) {
                     UstadJSOPDSFeed feed = mCatalogController.getModel().opdsFeed;
@@ -771,4 +797,13 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     }
 
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+
+        if(menu.findItem(CMD_SHARE_COURSE)!=null){
+            menu.findItem(CMD_SHARE_COURSE).setVisible(!(mSelectedEntries.length>0));
+        }
+
+    }
 }

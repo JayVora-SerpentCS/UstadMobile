@@ -253,9 +253,9 @@ public class MessageIDConstants {
 
     public static final int chooseDeviceToShareWith=142;
 
-    public static final int deviceConnectedTo=143;
+    public static final int deviceConnected =143;
 
-    public static final int deviceAddressLabel=144;
+    public static final int deviceConnectionStatus =144;
 
     public static final int shareDialogChoiceTitle=145;
 
@@ -264,4 +264,7 @@ public class MessageIDConstants {
     public static final int receivingFileTitle=147;
 
     public static final int courseListLabel=148;
+
+    public static final int deviceAvailable=149;
+    public static int somethingWentWrong =150;
 }

@@ -101,6 +101,8 @@ public class NetworkManagerAndroid extends NetworkManager{
      */
     public static final String PREF_KEY_SUPERNODE = "supernode_enabled";
 
+    public static final String PREF_KEY_RECEIVE_CONTENT = "receiver_mode_enabled";
+
     private static final String SERVICE_DEVICE_AVAILABILITY = "av";
 
     private int nodeStatus = -1;

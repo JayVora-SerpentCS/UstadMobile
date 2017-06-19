@@ -9,6 +9,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,10 +28,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.view.CatalogEntryView;
-import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
-import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -39,6 +38,9 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
+
+import static com.ustadmobile.core.controller.UstadBaseController.CMD_SHARE_COURSE;
+import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.PREF_KEY_RECEIVE_CONTENT;
 
 public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEntryView, View.OnClickListener {
 
@@ -51,8 +53,6 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     private NetworkManagerAndroid managerAndroid;
 
     private static Hashtable<Integer, Integer> BUTTON_ID_MAP =new Hashtable<>();
-
-    private static final int SHARE_COURSE_CONTENT_MENU_ID =1006;
 
 
     static {
@@ -148,7 +148,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.NONE, SHARE_COURSE_CONTENT_MENU_ID, Menu.NONE,
+        menu.add(Menu.NONE, CMD_SHARE_COURSE, Menu.NONE,
                 UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.shareCourseContent));
         return super.onCreateOptionsMenu(menu);
     }
@@ -157,8 +157,9 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
-            case SHARE_COURSE_CONTENT_MENU_ID:
-                UstadBaseController.handleClickAppMenuItem(SHARE_COURSE_CONTENT_MENU_ID, getContext());
+            case CMD_SHARE_COURSE:
+                UstadMobileSystemImpl.getInstance().setAppPref(PREF_KEY_RECEIVE_CONTENT,"false",this);
+                UstadBaseController.handleClickAppMenuItem(CMD_SHARE_COURSE, getContext());
                 return true;
         }
         return super.onOptionsItemSelected(item);
