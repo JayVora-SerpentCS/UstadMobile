@@ -489,10 +489,6 @@ public class MockNetworkManager extends NetworkManager {
         //TODO: implement this.test
     }
 
-    @Override
-    public void startContentSharing(String deviceName, boolean isReceivingContent) {
-
-    }
 
 
     @Override

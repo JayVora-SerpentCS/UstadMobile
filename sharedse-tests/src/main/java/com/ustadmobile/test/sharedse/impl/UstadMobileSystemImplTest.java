@@ -79,13 +79,6 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
 
 
     @Override
-    public String getDeviceName(Object context) {
-        return null;
-    }
-
-
-
-    @Override
     public String getCacheDir(int mode, Object context) {
         File tmpDir = cacheDirs.get(mode);
         if(tmpDir == null) {
