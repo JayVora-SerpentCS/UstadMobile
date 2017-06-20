@@ -700,8 +700,4 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         return new File(((Context)context).getApplicationInfo().sourceDir).getAbsolutePath();
     }
 
-    @Override
-    public String getDeviceName(Object context) {
-        return Build.MANUFACTURER+" "+Build.MODEL;
-    }
 }

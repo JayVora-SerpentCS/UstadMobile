@@ -134,9 +134,6 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private int currentWifiDirectGroupStatus= WIFI_DIRECT_GROUP_STATUS_INACTIVE;
 
-    private HashMap<String,String> dnsTextRecords=null;
-
-    private boolean isContentSharingEnabled =false;
     /**
      * Assets are served over http that are used to interact with the content (e.g. to inject a
      * javascript into the content that handles autoplay).
@@ -148,6 +145,9 @@ public class NetworkManagerAndroid extends NetworkManager{
      * A list of wifi direct ssids that are connected to using connectToWifiDirectGroup
      */
     private List<String> temporaryWifiDirectSsids = new ArrayList<>();
+
+
+    private boolean isContentSharingEnabled =false;
 
     /**
      * All activities bind to NetworkServiceAndroid. NetworkServiceAndroid will call this init
@@ -234,7 +234,10 @@ public class NetworkManagerAndroid extends NetworkManager{
                     String deviceMac = intent.getStringExtra(WifiDirectHandler.TXT_MAP_KEY);
                     DnsSdTxtRecord txtRecord = networkService.getWifiDirectHandlerAPI().
                             getDnsSdTxtRecordMap().get(deviceMac);
-                    handleWifiDirectSdTxtRecordsAvailable(txtRecord.getFullDomain(),deviceMac, (HashMap<String, String>) txtRecord.getRecord());
+                    HashMap<String,String> textRecord=(HashMap<String, String>) txtRecord.getRecord();
+                    textRecord.put(SD_TXT_KEY_DV_NAME,txtRecord.getDevice().deviceName);
+                    textRecord.put(SD_TXT_KEY_DV_STATUS,String.valueOf(txtRecord.getDevice().status));
+                    handleWifiDirectSdTxtRecordsAvailable(txtRecord.getFullDomain(),deviceMac,textRecord);
 
                     break;
                 case WifiDirectHandler.Action.NOPROMPT_GROUP_CREATION_ACTION:
@@ -285,16 +288,13 @@ public class NetworkManagerAndroid extends NetworkManager{
     public void startSuperNode() {
        if(networkService.getWifiDirectHandlerAPI()!=null){
            WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
-           wifiDirectHandler.stopServiceDiscovery();
            wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
            if(nsdHelperAndroid.isDiscoveringNetworkService()){
                nsdHelperAndroid.stopNSDiscovery();
            }
-           if(!isContentSharingEnabled){
-               dnsTextRecords=getDnsTextRecords();
-               nsdHelperAndroid.registerNSDService();
-           }
-           wifiDirectHandler.addLocalService(NETWORK_SERVICE_NAME,dnsTextRecords);
+           nsdHelperAndroid.registerNSDService();
+           wifiDirectHandler.addLocalService(NETWORK_SERVICE_NAME,getDnsTextRecords());
+           wifiDirectHandler.continuouslyDiscoverServices();
            bluetoothServerAndroid.start();
            if(isContentSharingEnabled){
                addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, receivingCourseNotificationMessage);
@@ -313,34 +313,13 @@ public class NetworkManagerAndroid extends NetworkManager{
             if(mBuilder!=null && mNotifyManager!=null){
                 removeNotification(NOTIFICATION_TYPE_SERVER);
             }
-
             wifiDirectHandler.removeService();
             wifiDirectHandler.continuouslyDiscoverServices();
-
-            if(!isContentSharingEnabled){
-                nsdHelperAndroid.startNSDiscovery();
-                bluetoothServerAndroid.stop();
-            }else {
-                nsdHelperAndroid.stopNSDiscovery();
-            }
+            nsdHelperAndroid.startNSDiscovery();
+            bluetoothServerAndroid.stop();
             isSuperNodeEnabled=false;
             nodeStatus = NODE_STATUS_CLIENT_RUNNING;
         }
-    }
-
-    @Override
-    public void startContentSharing(String deviceName,boolean isReceiverDevice) {
-        isContentSharingEnabled =true;
-        if(networkService.getWifiDirectHandlerAPI()!=null && isReceiverDevice){
-            dnsTextRecords=getDnsTextRecords();
-            dnsTextRecords.remove(SD_TXT_KEY_IP_ADDR);
-            dnsTextRecords.remove(SD_TXT_KEY_PORT);
-            dnsTextRecords.remove(SERVICE_DEVICE_AVAILABILITY);
-            dnsTextRecords.put(SD_TXT_KEY_DV_NAME,deviceName);
-
-        }
-        setSuperNodeEnabled(getContext(),isReceiverDevice);
-
     }
 
 

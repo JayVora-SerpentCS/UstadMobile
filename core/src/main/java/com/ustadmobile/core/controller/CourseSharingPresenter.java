@@ -53,9 +53,8 @@ public class CourseSharingPresenter extends BaseCatalogController implements Net
 
     }
 
-    public void handleClickConnectWiFiDirect(NetworkNode networkNode){
-        networkManager.setP2PConnectedNode(networkNode);
-        networkManager.connectWifiDirect(networkNode.getDeviceWifiDirectMacAddress());
+    public void handleClickConnectWiFiDirect(String wifiMACAddress){
+        networkManager.connectWifiDirect(wifiMACAddress);
     }
 
 

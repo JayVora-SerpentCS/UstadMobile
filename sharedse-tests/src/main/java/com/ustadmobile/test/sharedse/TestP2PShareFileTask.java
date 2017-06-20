@@ -95,7 +95,6 @@ public class TestP2PShareFileTask {
         Assert.assertEquals("Client mode switched on ready to receive files", 200, result.getStatus());
 
         manager.setSharedFeed(new String[]{ENTRY_ID});
-        manager.startContentSharing(UstadMobileSystemImpl.getInstance().getDeviceName(manager.getContext()),false);
 
         if(manager.getNodeByBluetoothAddr(TEST_REMOTE_BLUETOOTH_DEVICE)==null){
             synchronized (nodeDiscoveryLock){

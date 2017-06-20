@@ -111,6 +111,11 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * Tag to hold device name value in DNS-Text record
      */
     public static final String SD_TXT_KEY_DV_NAME = "dn";
+
+    /**
+     * Tag to hold device status value in DNS-Text record
+     */
+    public static final String SD_TXT_KEY_DV_STATUS = "st";
     /**
      * Tag to hold device service port value in DNS-Text record
      */
@@ -405,6 +410,7 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
             String ipAddr = txtRecords.get(SD_TXT_KEY_IP_ADDR)==null? null: txtRecords.get(SD_TXT_KEY_IP_ADDR);
             String btAddr = txtRecords.get(SD_TXT_KEY_BT_MAC)==null ? null: txtRecords.get(SD_TXT_KEY_BT_MAC);
             String deviceName=txtRecords.get(SD_TXT_KEY_DV_NAME)==null ? null:txtRecords.get(SD_TXT_KEY_DV_NAME);
+            String deviceStatus=txtRecords.get(SD_TXT_KEY_DV_STATUS)==null ? null:txtRecords.get(SD_TXT_KEY_DV_STATUS);
             int port=txtRecords.get(SD_TXT_KEY_PORT)==null ? 0 :Integer.parseInt(txtRecords.get(SD_TXT_KEY_PORT));
 
             boolean newNode;
@@ -428,6 +434,7 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
                 node.setPort(port);
                 node.setWifiDirectLastUpdated(Calendar.getInstance().getTimeInMillis());
                 node.setDeviceName(deviceName);
+                node.setStatus(Integer.parseInt(deviceStatus));
             }
 
 
@@ -487,6 +494,24 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
             for(NetworkNode node : knownNetworkNodes) {
                 nodeIp = node.getDeviceIpAddress();
                 if(nodeIp != null && nodeIp.equals(ipAddr))
+                    return node;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get known network node using it's WiFi MAC address
+     * @param macAddress Device WiFi MAC address
+     * @return
+     */
+    public NetworkNode getNodeByWiFiMacAddress(String macAddress){
+        synchronized (knownNetworkNodes) {
+            String deviceAddress;
+            for(NetworkNode node : knownNetworkNodes) {
+                deviceAddress = node.getDeviceWifiDirectMacAddress();
+                if(deviceAddress != null && deviceAddress.equals(macAddress))
                     return node;
             }
         }
@@ -1105,14 +1130,6 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * @param shareTitle Share dialog title
      */
     public abstract void shareAppSetupFile(String filePath, String shareTitle);
-
-    /**
-     * Method which is responsible for setting up state for the device to received
-     * shared content from peer device
-     * @param deviceName Peer device name.
-     * @param isReceivingContent TRUE when receiving and FALSE when sending
-     */
-    public abstract void startContentSharing(String deviceName,boolean isReceivingContent);
 
     /**
      * Method which is responsible to connect a device to peer device using WiFi-Direct

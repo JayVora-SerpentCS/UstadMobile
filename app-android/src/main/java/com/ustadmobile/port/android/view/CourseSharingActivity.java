@@ -37,7 +37,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * <h1>CourseSharingActivity</h1>
@@ -79,16 +78,19 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
     private TextView toolbarTitle,connectedNetworkName,connectedDeviceAddress,receivingFileNameView;
 
     private CardView connectedDeviceView;
+
     private ProgressBar fileReceivingProgressBar;
 
     private UstadMobileSystemImpl impl;
 
-    private NetworkNode connectedNode =null;
+    private NetworkNode nodeToConnectTo =null;
 
     private boolean isSharedFileDialogShown=false;
 
-    private List<NetworkNode> deviceList=new Vector<>();
-
+    /**
+     * All discovered devices tends to have [Phone] at the beginning of the device name,
+     * for readability we have to get rid of that
+     */
     private static final String DEVICE_PHONE_TAG="[Phone]";
 
     private CourseSharingPresenter mPresenter;
@@ -126,7 +128,6 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
 
         //enable sharing mode
         managerAndroid.setContentSharingEnabled(true);
-
         Hashtable args = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
         mPresenter =new CourseSharingPresenter(this,this,args);
         mPresenter.onCreate();
@@ -172,7 +173,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                receivingFileNameView.setText(title);
+                receivingFileNameView.setText(Html.fromHtml(title));
             }
         });
     }
@@ -205,15 +206,18 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
     public void setDeviceMode(boolean isReceiverDevice) {
         if(!isReceiverDevice){
             refreshDeviceList();
+        }else{
+            if(!managerAndroid.isSuperNodeEnabled()){
+                managerAndroid.setSuperNodeEnabled(this,true);
+            }
         }
-        managerAndroid.startContentSharing(impl.getDeviceName(this),isReceiverDevice);
         String title=isReceiverDevice ? impl.getString(MessageIDConstants.receiveSharedCourse)
                 :impl.getString(MessageIDConstants.chooseDeviceToShareWith);
         int deviceListVisibility=isReceiverDevice ? View.GONE: View.VISIBLE;
         deviceRecyclerView.setVisibility(deviceListVisibility);
         managerAndroid.setContentSharingEnabled(true);
         setToolbarTitle(title);
-        mPresenter.handleUserConfirmation(null,false, NetworkManager.NOTIFICATION_TYPE_SERVER);
+        managerAndroid.removeWiFiDirectGroup();
 
     }
 
@@ -228,7 +232,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
                 WifiP2pGroup wifiP2pGroup=managerAndroid.getWifiDirectHandler().getWifiP2pGroup();
                 if(wifiP2pGroup!=null){
                     for(WifiP2pDevice device: wifiP2pGroup.getClientList()){
-                        NetworkNode networkNode=getNetworkNodeByMacAddress(device.deviceAddress);
+                        NetworkNode networkNode=managerAndroid.getNodeByWiFiMacAddress(device.deviceAddress);
                         if(networkNode!=null){
                             networkNode.setStatus(device.status);
                         }
@@ -245,10 +249,10 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
 
                         deviceStatus=impl.getString(MessageIDConstants.deviceConnectionStatus)+": "+impl.getString(MessageIDConstants.deviceConnected);
                         String ipAddress=String.valueOf(managerAndroid.getWifiDirectHandler().getWifiP2pInfo().groupOwnerAddress).replace("/","");
-                        connectedNode =new NetworkNode(groupOwner.deviceAddress,ipAddress);
-                        connectedNode.setPort(managerAndroid.getHttpListeningPort());
-                        connectedNode.setDeviceName(deviceName);
-                        managerAndroid.setP2PConnectedNode(connectedNode);
+                        nodeToConnectTo =new NetworkNode(groupOwner.deviceAddress,ipAddress);
+                        nodeToConnectTo.setPort(managerAndroid.getHttpListeningPort());
+                        nodeToConnectTo.setDeviceName(deviceName);
+                        managerAndroid.setP2PConnectedNode(nodeToConnectTo);
                         mPresenter.handleOnDeviceConnected();
                     }else{
                         isGroupInfoAvailable=false;
@@ -261,8 +265,8 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
 
         }else{
             //Update device status on disconnecting WiFi Direct
-            for(NetworkNode networkNode: deviceList){
-                NetworkNode node=getNetworkNodeByMacAddress(networkNode.getDeviceWifiDirectMacAddress());
+            for(NetworkNode networkNode: managerAndroid.getKnownNodes()){
+                NetworkNode node=managerAndroid.getNodeByWiFiMacAddress(networkNode.getDeviceWifiDirectMacAddress());
                 node.setStatus(WifiP2pDevice.AVAILABLE);
             }
         }
@@ -281,16 +285,9 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                for(NetworkNode networkNode:managerAndroid.getKnownNodes()){
-                    NetworkNode node=getNetworkNodeByMacAddress(networkNode.getDeviceWifiDirectMacAddress());
-                    if(networkNode.getDeviceName()!=null && node==null){
-                        networkNode.setStatus(WifiP2pDevice.AVAILABLE);
-                        deviceList.add(networkNode);
-                    }
-                }
-                int visibility=deviceList.size()> 0 ? View.GONE: View.VISIBLE;
+                int visibility=managerAndroid.getKnownNodes().size() > 0 ? View.GONE: View.VISIBLE;
                 waitingProgressBar.setVisibility(visibility);
-                deviceAdapter.setNodeList(deviceList);
+                deviceAdapter.setNodeList(managerAndroid.getKnownNodes());
                 deviceAdapter.notifyDataSetChanged();
                 deviceRecyclerView.invalidate();
             }
@@ -311,7 +308,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
 
     @Override
     public void setReceivingProgress(final int progress, final String title) {
-        setFileTitle(String.format(impl.getString(MessageIDConstants.receivingFileTitle),title));
+        setFileTitle(String.format(impl.getString(MessageIDConstants.receivingFileTitle),"<b>"+title+"</b>"));
         fileReceivingProgressBar.setProgress(progress);
     }
 
@@ -324,12 +321,10 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
 
 
     @Override
-    public void acquireOPDSFeed() {
-
+    public void acquireOPDSFeed(){
         if(!isSharedFileDialogShown){
-
-            String opdsSrcURL = UMFileUtil.joinPaths(new String[]{"http://" + connectedNode.getDeviceIpAddress() + ":"
-                    + connectedNode.getPort(),"/shared/shared.opds"});
+            String opdsSrcURL = UMFileUtil.joinPaths(new String[]{"http://" + nodeToConnectTo.getDeviceIpAddress() + ":"
+                    + nodeToConnectTo.getPort(),"/shared/shared.opds"});
             File opdsDestURL = new File(managerAndroid.getContext().getCacheDir(), "shared.opds");
             mPresenter.handleDownloadFeed(opdsSrcURL,opdsDestURL.getAbsolutePath());
             isSharedFileDialogShown=true;
@@ -366,7 +361,7 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
                     android.support.v7.app.AlertDialog.Builder builder=new android.support.v7.app.AlertDialog.Builder(CourseSharingActivity.this);
                     builder.setTitle(impl.getString(MessageIDConstants.shareDialogChoiceTitle));
                     builder.setMessage(Html.fromHtml(String.format(impl.getString(MessageIDConstants.shareDialogChoiceMessage)
-                            ,message, connectedNode.getDeviceName()+";-<br/>",filesList+"<br/><br/>")));
+                            ,message, nodeToConnectTo.getDeviceName()+";-<br/>",filesList+"<br/><br/>")));
                     builder.setNegativeButton(impl.getString(MessageIDConstants.cancel), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -408,7 +403,8 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
 
         @Override
         public void onBindViewHolder(final DeviceViewHolder holder, int position) {
-            holder.deviceName.setText(nodeList.get(holder.getAdapterPosition()).getDeviceName().toUpperCase());
+            String deviceName=nodeList.get(holder.getAdapterPosition()).getDeviceName();
+            holder.deviceName.setText(deviceName.substring(DEVICE_PHONE_TAG.length(),deviceName.length()).toUpperCase());
 
             String connectionStatus=nodeList.get(holder.getAdapterPosition()).getStatus()==WifiP2pDevice.CONNECTED ?
                     impl.getString(MessageIDConstants.deviceConnectionStatus)+": "+
@@ -421,8 +417,8 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
             holder.deviceHolder.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    connectedNode =nodeList.get(holder.getAdapterPosition());
-                    mPresenter.handleClickConnectWiFiDirect(connectedNode);
+                    nodeToConnectTo =nodeList.get(holder.getAdapterPosition());
+                    mPresenter.handleClickConnectWiFiDirect(nodeToConnectTo.getDeviceWifiDirectMacAddress());
                 }
             });
 
@@ -432,7 +428,6 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
         public int getItemCount() {
             return nodeList.size();
         }
-
 
     }
 
@@ -448,15 +443,6 @@ public class CourseSharingActivity extends UstadBaseActivity  implements CourseS
             deviceStatus = (TextView) itemView.findViewById(R.id.deviceMacAddress);
             deviceHolder= (FrameLayout) itemView.findViewById(R.id.deviceHolder);
         }
-    }
-
-    private NetworkNode getNetworkNodeByMacAddress(String deviceMacAddress){
-        for(NetworkNode node: deviceList){
-            if(node.getDeviceWifiDirectMacAddress().equals(deviceMacAddress)){
-                return node;
-            }
-        }
-        return null;
     }
 
 }
