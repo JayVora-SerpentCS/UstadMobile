@@ -23,11 +23,14 @@ import android.widget.TextView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogEntryPresenter;
+import com.ustadmobile.core.controller.CourseSharingPresenter;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogEntryView;
+import com.ustadmobile.core.view.CourseSharingView;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -54,6 +57,8 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     private static Hashtable<Integer, Integer> BUTTON_ID_MAP =new Hashtable<>();
 
+    private UstadJSOPDSFeed feed=null;
+
 
     static {
         BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_DOWNLOAD, R.id.activity_catalog_entry_download_button);
@@ -67,6 +72,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         private ImageView iconView;
 
         private TextView titleView;
+
 
         public SeeAlsoViewHolder(View itemView) {
             super(itemView);
@@ -99,12 +105,10 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         mPresenter.onCreate();
 
         try{
-            UstadJSOPDSFeed feed=new UstadJSOPDSFeed();
+            feed=new UstadJSOPDSFeed();
             feed.loadFromString(args.get(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR).toString());
 
             String entryId=feed.entries[0].id;
-            String [] entryToShare={entryId};
-            managerAndroid.setSharedFeed(entryToShare);
 
             List<String> entries=new ArrayList<>();
             entries.add(entryId);
@@ -158,8 +162,10 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case CMD_SHARE_COURSE:
-                UstadMobileSystemImpl.getInstance().setAppPref(PREF_KEY_RECEIVE_CONTENT,"false",this);
-                UstadBaseController.handleClickAppMenuItem(CMD_SHARE_COURSE, getContext());
+                Hashtable courseHashTable = new Hashtable();
+                courseHashTable.put(CourseSharingPresenter.ARG_SHARED_ENTRIES, UMFileUtil.joinString(new String[]{feed.entries[0].id},
+                        CourseSharingPresenter.ARRAY_SEPARATOR));
+                UstadMobileSystemImpl.getInstance().go(CourseSharingView.VIEW_NAME, courseHashTable, this);
                 return true;
         }
         return super.onOptionsItemSelected(item);

@@ -59,7 +59,7 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
                 if(new ResumableHttpDownload(srcUrl,destUrl).download()){
                     return newFixedLengthResponse("OK");
                 }else{
-                    return newFixedLengthResponse("401");
+                    return newFixedLengthResponse("500");
                 }
             } else if(CMD_CREATEGROUP.equals(command)) {
                 int groupStatus = networkManager.getWifiDirectGroupStatus();

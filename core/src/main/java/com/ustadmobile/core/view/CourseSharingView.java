@@ -11,9 +11,6 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
  *
  * @see com.ustadmobile.core.view.UstadView
  */
-/**
- * Created by kileha3 on 10/06/2017.
- */
 
 public interface CourseSharingView extends UstadView{
 
@@ -43,18 +40,6 @@ public interface CourseSharingView extends UstadView{
      * @param deviceAddress Device Wifi MAC Address
      */
     void setConnectedDeviceInfo(String deviceName,String deviceAddress);
-
-    /**
-     * Method to handle when user terminate file sharing process
-     */
-    void handleUserCancelDownloadTask();
-
-    /**
-     * Method to start acquisition task
-     * @param feed OPDS feed
-     */
-    void handleUserStartReceivingTask(UstadJSOPDSFeed feed);
-
     /**
      * Method responsible to acquire an OPDS feed from peer device
      */
@@ -78,5 +63,24 @@ public interface CourseSharingView extends UstadView{
      * @param visible Visible when TRUE otherwise FALSE
      */
     void setReceivingViewVisibility(boolean visible);
+
+    /**
+     * Method responsible to set device sharing mode (Sender or Receiver)
+     * @param isReceiverDevice TRUE when receiver FALSE otherwise
+     */
+    void setDeviceMode(boolean isReceiverDevice);
+
+    /**
+     * Method to handle device change states
+     * @param isConnected TRUE when WiFi Direct is connected otherwise FALSE
+     */
+    void handleOnDeviceStateChanged(boolean isConnected);
+
+    /**
+     * Refresh device list on addition or remove of a device
+     */
+    void refreshDeviceList();
+
+    void showErrorMessage(String message);
 
 }

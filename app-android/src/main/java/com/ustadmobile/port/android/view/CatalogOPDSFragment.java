@@ -63,6 +63,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.ControllerReadyListener;
+import com.ustadmobile.core.controller.CourseSharingPresenter;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.impl.UMLog;
@@ -71,7 +72,9 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.core.view.CourseSharingView;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -317,9 +320,10 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                 for(int position=0;position<mSelectedEntries.length;position++){
                     entries[position]=mSelectedEntries[position].id;
                 }
-                ((NetworkManagerAndroid)UstadMobileSystemImpl.getInstance().getNetworkManager()).setSharedFeed(entries);
-                UstadMobileSystemImpl.getInstance().setAppPref(PREF_KEY_RECEIVE_CONTENT,"false",getActivity());
-                UstadBaseController.handleClickAppMenuItem(CMD_SHARE_COURSE, getContext());
+                Hashtable courseHashTable = new Hashtable();
+                courseHashTable.put(CourseSharingPresenter.ARG_SHARED_ENTRIES, UMFileUtil.joinString(entries,
+                        CourseSharingPresenter.ARRAY_SEPARATOR));
+                UstadMobileSystemImpl.getInstance().go(CourseSharingView.VIEW_NAME, courseHashTable, getContext());
                 return true;
 
             case R.id.action_opds_acquire:

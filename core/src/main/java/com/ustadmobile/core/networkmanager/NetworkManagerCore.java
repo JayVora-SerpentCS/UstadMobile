@@ -12,6 +12,8 @@ public interface NetworkManagerCore {
 
     UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed, Object mContext, boolean localNetworkEnabled, boolean wifiDirectEnabled);
 
+    UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed, Object mContext, boolean localNetworkEnabled, boolean wifiDirectEnabled,boolean isContentSharingEnabled);
+
     void addAcquisitionTaskListener(AcquisitionListener listener);
 
     void removeAcquisitionTaskListener(AcquisitionListener listener);
@@ -25,5 +27,17 @@ public interface NetworkManagerCore {
     void removeNetworkManagerListener(NetworkManagerListener listener);
 
     EntryCheckResponse getEntryResponseWithLocalFile(String entryId);
+
+    void removeNotification(int notificationType);
+
+    void removeWiFiDirectGroup();
+
+    UstadJSOPDSFeed acquireOPDSFeedFromPeer(String srcURL,String destURL);
+
+    void setSharedFeed(String [] entries);
+
+    void setP2PConnectedNode(NetworkNode node);
+
+    void connectWifiDirect(String wifiMACAddress);
 
 }

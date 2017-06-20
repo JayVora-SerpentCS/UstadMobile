@@ -761,7 +761,7 @@ public class NetworkManagerAndroid extends NetworkManager{
     //TODO: Add a status flag for removal requested
     @Override
     public synchronized void removeWiFiDirectGroup() {
-        if(currentWifiDirectGroupStatus == WIFI_DIRECT_GROUP_STATUS_ACTIVE) {
+        if((currentWifiDirectGroupStatus == WIFI_DIRECT_GROUP_STATUS_ACTIVE) || isContentSharingEnabled) {
             networkService.getWifiDirectHandlerAPI().removeGroup(new WifiP2pManager.ActionListener() {
                 @Override
                 public void onSuccess() {

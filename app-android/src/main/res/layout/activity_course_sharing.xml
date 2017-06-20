@@ -21,7 +21,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
                 <TextView
-                    android:layout_toLeftOf="@+id/receive_share_content"
                     android:gravity="center_vertical"
                     android:layout_weight="2"
                     android:id="@+id/toolbarTitle"
@@ -29,15 +28,6 @@
                     android:textColor="@color/icons"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
-                <android.support.v7.widget.SwitchCompat
-                    android:layout_marginEnd="@dimen/dimen_10dp"
-                    android:layout_marginRight="@dimen/dimen_10dp"
-                    android:layout_centerVertical="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentEnd="true"
-                    android:id="@+id/receive_share_content"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
             </RelativeLayout>
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
