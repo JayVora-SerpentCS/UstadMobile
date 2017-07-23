@@ -73,4 +73,6 @@ public interface School extends NanoLrsModel{
     void setAlerts(Collection<? extends Alert2School> alerts);
 
 
+    //TODO: School Holidays
+    //TODO: School Weekdays
 }

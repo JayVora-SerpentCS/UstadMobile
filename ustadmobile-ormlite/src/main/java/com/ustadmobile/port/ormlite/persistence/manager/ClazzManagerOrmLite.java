@@ -37,5 +37,20 @@ public class ClazzManagerOrmLite extends BaseManagerOrmLite implements ClazzMana
         return(List<Clazz>)(Object)dao.query(queryBuilder.prepare());
     }
 
+    @Override
+    public List<Clazz> findAllByTeacherName(Object dbContext, Person teacher) throws SQLException {
+        return null;
+    }
+
+    @Override
+    public List<Person> findAllStudents(Object dbContext, Clazz clazz) throws SQLException {
+        return null;
+    }
+
+    @Override
+    public List<Person> findAllTeachers(Object dbContext, Clazz clazz) throws SQLException {
+        return null;
+    }
+
 
 }

@@ -8,7 +8,7 @@ import com.ustadmobile.nanolrs.core.model.NanoLrsModel;
 /**
  * This is an intermediary class for Claendar <-> Holiday m2m relationship.
  */
-interface CalendarHolidays extends NanoLrsModel {
+public interface CalendarHolidays extends NanoLrsModel {
     /**
      * Tells the generator that this is the primary key.
      *

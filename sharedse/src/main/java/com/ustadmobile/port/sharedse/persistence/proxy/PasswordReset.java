@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.persistence.proxy;
 
-import com.j256.ormlite.field.types.DateTimeType;
 import com.ustadmobile.nanolrs.core.model.NanoLrsModel;
 import com.ustadmobile.port.sharedse.persistence.PrimaryKeyAnnotationClass;
 
@@ -34,6 +33,6 @@ public interface PasswordReset extends NanoLrsModel{
     //DateTimeType getDateCreated();
     //void setDateCreated(DateTimeType dateCreated);
 
-    DateTimeType getDateAccessed();
-    void setDateAccessed(DateTimeType dateAccessed);
+    long getDateAccessed();
+    void setDateAccessed(long dateAccessed);
 }

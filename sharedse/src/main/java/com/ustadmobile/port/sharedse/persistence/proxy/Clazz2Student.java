@@ -6,7 +6,7 @@ package com.ustadmobile.port.sharedse.persistence.proxy;
 import com.ustadmobile.nanolrs.core.model.NanoLrsModel;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 
-interface Clazz2Student extends NanoLrsModel {
+public interface Clazz2Student extends NanoLrsModel {
     /**
      * Tells the generator that this is the primary key.
      *

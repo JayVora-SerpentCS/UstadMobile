@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.persistence.proxy;
 
-import com.j256.ormlite.field.types.DateTimeType;
 import com.ustadmobile.nanolrs.core.model.NanoLrsModel;
 import com.ustadmobile.port.sharedse.persistence.PrimaryKeyAnnotationClass;
 

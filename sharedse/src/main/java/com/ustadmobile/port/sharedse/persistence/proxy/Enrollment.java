@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.persistence.proxy;
 
-import com.j256.ormlite.field.types.DateTimeType;
 import com.ustadmobile.nanolrs.core.model.NanoLrsModel;
 
 /**
@@ -36,14 +35,14 @@ public interface Enrollment extends NanoLrsModel{
     Person getUser();
     void setUser(Person person);
 
-    DateTimeType getDateJoined();
-    void setDateJoined(DateTimeType dateJoined);
+    long getDateJoined();
+    void setDateJoined(long dateJoined);
 
-    DateTimeType getDateModified();
-    void setDateModified(DateTimeType dateModified);
+    long getDateModified();
+    void setDateModified(long dateModified);
 
-    DateTimeType getDateUpdated();
-    void setDateUpdated(DateTimeType dateUpdated);
+    long getDateUpdated();
+    void setDateUpdated(long dateUpdated);
 
     boolean isActive();
     void setActive(boolean active);

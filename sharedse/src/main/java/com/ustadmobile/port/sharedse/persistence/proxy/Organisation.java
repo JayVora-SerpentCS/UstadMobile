@@ -25,6 +25,12 @@ public interface Organisation extends NanoLrsModel {
     String getDesc();
     void setDesc(String desc);
 
+    String getCode();
+    void setCode(String code);
+
+    AttendanceStatusLabel getStatusLabel();
+    void setStatusLabel(AttendanceStatusLabel statusLabel);
+
     boolean isPublik();
     void setPublik(boolean isPublik);
 

@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.persistence.proxy;
 
-import com.j256.ormlite.field.types.DateTimeType;
 import com.ustadmobile.nanolrs.core.manager.NanoLrsManager;
 import com.ustadmobile.nanolrs.core.model.NanoLrsModel;
 import com.ustadmobile.port.sharedse.persistence.PrimaryKeyAnnotationClass;
@@ -34,8 +33,8 @@ public interface Person extends NanoLrsModel{
     String getLastName();
     void setLastName(String lastName);
 
-    DateTimeType getLastLogin();
-    void setLastLogin(DateTimeType lastLogin);
+    long getLastLogin();
+    void setLastLogin(long lastLogin);
 
     boolean isSuperuser();
     void setSuperuser(boolean superuser);
@@ -49,8 +48,8 @@ public interface Person extends NanoLrsModel{
     boolean isActive();
     void setActive(boolean active);
 
-    DateTimeType getDateJoined();
-    void setDateJoined(DateTimeType dateJoined);
+    long getDateJoined();
+    void setDateJoined(long dateJoined);
 
     String getWebsite();
     void setWebsite(String website);
@@ -61,8 +60,8 @@ public interface Person extends NanoLrsModel{
     String getJobTitle();
     void setJobTitle(String jobTitle);
 
-    DateTimeType getDateOfBirth();
-    void setDateOfBirth(DateTimeType dateOfBirth);
+    long getDateOfBirth();
+    void setDateOfBirth(long dateOfBirth);
 
     String getAddress();
     void setAddress(String address);
@@ -84,8 +83,8 @@ public interface Person extends NanoLrsModel{
     String getNotes();
     void setNotes(String notes);
 
-    DateTimeType getLastActivityDate();
-    void setLastActivityDate(DateTimeType lastActivityDate);
+    long getLastActivityDate();
+    void setLastActivityDate(long lastActivityDate);
 
     String getCustomRollNumber();
     void setCustomRollNumber(String customRollNumber);

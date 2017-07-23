@@ -8,7 +8,7 @@ import com.ustadmobile.nanolrs.core.model.NanoLrsModel;
 /**
  * This is an intermediary class for School<->Holiday m2m relationship
  */
-interface SchoolHolidays extends NanoLrsModel {
+public interface SchoolHolidays extends NanoLrsModel {
     /**
      * Tells the generator that this is the primary key.
      *

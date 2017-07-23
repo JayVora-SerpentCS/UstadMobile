@@ -5,7 +5,7 @@ package com.ustadmobile.port.sharedse.persistence.proxy;
 
 import com.ustadmobile.nanolrs.core.model.NanoLrsModel;
 
-interface CountryOrganisation extends NanoLrsModel {
+public interface CountryOrganisation extends NanoLrsModel {
     /**
      * Tells the generator that this is the primary key.
      *

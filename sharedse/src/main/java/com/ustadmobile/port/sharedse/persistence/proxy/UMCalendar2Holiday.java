@@ -5,7 +5,7 @@ package com.ustadmobile.port.sharedse.persistence.proxy;
 
 import com.ustadmobile.nanolrs.core.model.NanoLrsModel;
 
-interface UMCalendar2Holiday extends NanoLrsModel {
+public interface UMCalendar2Holiday extends NanoLrsModel {
     /**
      * Tells the generator that this is the primary key.
      *

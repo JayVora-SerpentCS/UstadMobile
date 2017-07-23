@@ -5,7 +5,7 @@ package com.ustadmobile.port.sharedse.persistence.proxy;
 
 import com.ustadmobile.nanolrs.core.model.NanoLrsModel;
 
-interface School2Weekend extends NanoLrsModel {
+public interface School2Weekend extends NanoLrsModel {
     /**
      * Tells the generator that this is the primary key.
      *
