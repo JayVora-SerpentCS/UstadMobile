@@ -92,6 +92,11 @@ public class BasePointController extends UstadBaseController implements DialogRe
         basePointView.setMenuItems(impl.getActiveUser(getContext()) != null ?
                 CoreBuildConfig.BASEPOINT_MENU_AUTHENTICATED : CoreBuildConfig.BASEPOINT_MENU_GUEST);
 
+        if(args == null || args.size() == 0) {
+            //handle when there are no arguments, use the default app first dest arguments
+            args = UMFileUtil.parseURLQueryString(CoreBuildConfig.FIRST_DESTINATION);
+        }
+
         Vector catalogTabs = UMFileUtil.splitCombinedViewArguments(args, "catalog", '-');
         for(int i = 0; i < catalogTabs.size(); i++) {
             basePointView.addTab((Hashtable)catalogTabs.elementAt(i));
