@@ -18,12 +18,18 @@
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
 
   <!-- Other module inherits                                      -->
+  <!-- <inherits name="org.xmlpull.XmlPull"/> -->
+  
+  <inherits name="com.google.gwt.xml.XML" />
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='com.ustadmobile.port.gwt.client.App_gwt'/>
 
   <!-- Specify the paths for translatable code                    -->
   <source path='client'/>
+  <source path='org.xmlpull' />
+  <source path='org.json' />
+  <source path='com.ustadmobile.core' />
   <source path='shared'/>
 
   <!-- allow Super Dev Mode -->

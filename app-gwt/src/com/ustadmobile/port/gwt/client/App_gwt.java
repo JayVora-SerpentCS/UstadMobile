@@ -1,7 +1,13 @@
 package com.ustadmobile.port.gwt.client;
 
+import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.port.gwt.shared.FieldVerifier;
 import com.ustadmobile.port.gwt.shared.OtherDir;
+
+import java.io.InputStream;
+
+import org.xmlpull.v1.XmlPullParser;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -18,7 +24,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-//import com.google.gwt.xml.client.XMLParser;
+import com.google.gwt.xml.client.XMLParser;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -47,8 +53,13 @@ public class App_gwt implements EntryPoint {
 		
 		//Trying to get XML Pullparser
 		//import org.xmlpull.v1.XmlPullParser;
-		//XMLParser xP;
+		XMLParser xP;
 		//import com.google.gwt.xml.client.XMLParser;
+		
+		//XmlPullParser xpp;
+		//This does not work. Lib needs java.io.Reader which is not in GWT
+	
+		InputStream is;
 		
 		final Button sendButton = new Button("Send");
 		final TextBox nameField = new TextBox();
@@ -107,6 +118,8 @@ public class App_gwt implements EntryPoint {
 			 */
 			public void onClick(ClickEvent event) {
 				sendNameToServer();
+				System.out.println("Testing ..");
+				testMe();
 			}
 
 			/**
@@ -116,6 +129,15 @@ public class App_gwt implements EntryPoint {
 				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
 					sendNameToServer();
 				}
+			}
+			
+			private void testMe(){
+				/*
+				Object context = null;
+				LoginController loginController = new LoginController(context);
+				String url = "https://umcloud1.ustadmobile.com:8086/syncendpoint/";
+				loginController.handleClickLogin("ram.narayan", "varuna", url);
+				*/
 			}
 
 			/**
